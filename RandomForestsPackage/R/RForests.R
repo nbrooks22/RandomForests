@@ -209,9 +209,7 @@ random_forest_regression <- function(data,m,t){
 
   # füge split_point/ split_index hinzu
   tree %>%
-    mutate(y = ifelse(name == "inner node", 0, y)) %>%  # inner Knoten: setze y = 0
-    mutate(split_index = ifelse(name == "leaf", 0, split_index),
-           split_point = ifelse(name == "leaf", 0, split_point)) -> tree
+    mutate(y = ifelse(name == "inner node", 0, y)) -> tree # inner Knoten: setze y = 0
 
   return(tree)
 
@@ -400,9 +398,7 @@ random_forest_classification <- function(data,m,t){
 
   # füge split_point/ split_index hinzu
   tree %>%
-    mutate(y = ifelse(name == "inner node", 0, y)) %>%  # inner Knoten: setze y = 0
-    mutate(split_index = ifelse(name == "leaf", 0, split_index),
-           split_point = ifelse(name == "leaf", 0, split_point)) -> tree
+    mutate(y = ifelse(name == "inner node", 0, y)) -> tree # inner Knoten: setze y = 0
 
   return(tree)
 }
