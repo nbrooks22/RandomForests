@@ -61,7 +61,7 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
       if(Position(function(x) identical(x, X[[i]]), A_1, nomatch = 0) > 0) Y <- Y + data$y[i]
       #if(X[[i]] %in% A1(j,s)) Y <- Y + data$y[i]
     }
-    1/n * Y
+    1/length(A_1) * Y
   }
   c2 <- function(j,s,v){
     Y <- 0
@@ -70,7 +70,7 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
       # schauen, ob X_i in der Liste ist
       if(Position(function(x) identical(x, X[[i]]), A_2, nomatch = 0) > 0) Y <- Y + data$y[i]
     }
-    1/n * Y
+    1/length(A_2) * Y
   }
 
   # mache das hier so lange bis jedes Blatt nur noch einen Datenpunkt hat
