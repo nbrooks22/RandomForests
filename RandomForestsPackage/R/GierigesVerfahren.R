@@ -136,9 +136,16 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
         j <- k
         # nehme von jedem Listenelement die j-te Komponente
         idx <- sapply(t, function(x) x[j])
-        optimum <- optimize(minimize, c(min(idx), max(idx)))
-        op[k] <- optimum$objective
-        value[k] <- optimum$minimum
+        # schauen, ob idx nur gleiche Elemente hat
+        if(length(unique(idx)) == 1){
+          optimum <- minimize(idx[[1]])
+          op[k] <- optimum
+          value[k] <- idx[[1]]
+        } else{
+          optimum <- optimize(minimize, c(min(idx), max(idx)))
+          op[k] <- optimum$objective
+          value[k] <- optimum$minimum
+        }
       }
 
       opt <- c() # c(j,s)
