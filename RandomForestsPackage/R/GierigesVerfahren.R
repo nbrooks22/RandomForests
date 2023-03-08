@@ -19,7 +19,9 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
   
   # schreibe Beobachtungen von X in Liste (Elemente sind die Spalten)
   X <- lapply(seq_len(ncol(data$x)), function(i) data$x[,i])
-  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = NA, A = list(NULL), c_value = NA)
+  n <- length(data$y)
+  mean <- 1/n*sum(data$y)
+  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = NA, A = list(NULL), c_value = mean)
 
   ##### Algorithmus
   tree[tree$node == 1,]$A[[1]] <- X # A = list of length(X)
@@ -52,7 +54,6 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
     A_2
   }
 
-  n <- length(data$y)
   c1 <- function(j,s,v){
     Y <- 0
     A_1 <- A1(j,s,v)
@@ -230,7 +231,9 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
   # analog wie regression
   # schreibe Beobachtungen von X in Liste (Elemente sind die Spalten)
   X <- lapply(seq_len(ncol(data$x)), function(i) data$x[,i])
-  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = NA, A = list(NULL), c_value = NA)
+  n <- length(data$y)
+  mean <- 1/n*sum(data$y)
+  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = NA, A = list(NULL), c_value = mean)
 
   ##### Algorithmus
   tree[tree$node == 1,]$A[[1]] <- X # A = list of length(X)
@@ -442,6 +445,9 @@ greedy_cart <- function(x,y,data, type = "reg", depth = 0, num_split = 2, min_nu
 
 
 ### Beispiel Dateneingabe:
+# X <- runif(m,0,1)
+# e <- rnorm(m,0,0.2)
+# Y <- sin(2*pi*X) + e                        
 ## Regression (eindimensional)                      
 # data1 <- list(a = X, b = Y)    
 # greedy_cart(x = a, y = b, data = data1, type = "reg")
@@ -449,6 +455,21 @@ greedy_cart <- function(x,y,data, type = "reg", depth = 0, num_split = 2, min_nu
 # data2 <- list(a = X, b = -X, c = Y) a ist x1 Koordinate, b ist x2 Koordinate
 # greedy_cart(x = c(a,b), y = c, data = data2, type = "reg")
 ## Klassifikation
-# data3 <- tibble(x1 = X1, x2 = X2, y = f(X1,X2,e)) mit X1, X2, f,... aus vorherigem Beispiel
+# X1 <- runif(100,0,1)
+# X2 <- runif(100,0,1)
+# e <- rnorm(100,0,0.2)
+# kappa <- function(x,y) y - 0.5 - 0.3*sin(2*pi*x)
+# f <- function(x,y,e){
+#   Y <- c()
+#   for(i in seq_along(x)){
+#     if(kappa(X1[i],X2[i]) - e[i] <= 0){
+#       Y[i] <- 1
+#     } else{
+#       Y[i] <- 2
+#     }
+#   }
+#   Y
+# }                      
+# data3 <- tibble(x1 = X1, x2 = X2, y = f(X1,X2,e))
 # greedy_cart(x = c(x1,x2), y = y, data = data3, type = "class")                      
                                    
