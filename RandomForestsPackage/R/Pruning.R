@@ -94,7 +94,7 @@ tree_seq <- function(trees){
 
 
 
-pruning_regression <- function(tree)
+pruning_regression <- function(trees)
 {
   trees <- list(trees)
   trees
