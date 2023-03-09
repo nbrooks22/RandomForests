@@ -276,14 +276,17 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
         idx <- idx + 1
       }
     }
+    # nicht durch 0 teilen
+    if(length(A) == 0) return(0)              
     return(idx/length(A))
   }
 
   # c1
   c1 <- function(j,s,v){
     obj <- rep(NA,K)
+    A_1 <- A1(j,s,v)
     for(k in 1:K){
-      obj[[k]] <- p(k, A1(j,s,v))
+      obj[[k]] <- p(k, A_1)
     }
     which.max(obj)
   }
@@ -291,8 +294,9 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
   # c2
   c2 <- function(j,s,v){
     obj <- rep(NA,K)
+    A_2 <- A2(j,s,v)
     for(k in 1:K){
-      obj[[k]] <- p(k, A2(j,s,v))
+      obj[[k]] <- p(k, A_2)
     }
     which.max(obj)
   }
@@ -323,7 +327,9 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
 
       # minimiere diese Funktion
       minimize <- function(s){
-        length(A1(j,s,v))*(1-p(c1(j,s,v),A1(j,s,v))) + length(A2(j,s,v))*(1-p(c2(j,s,v), A2(j,s,v)))
+        A_1 <- A1(j,s,v)
+        A_2 <- A2(j,s,v)
+        length(A_1)*(1-p(c1(j,s,v),A_1)) + length(A_2)*(1-p(c2(j,s,v), A_2))
       }
 
 
@@ -342,9 +348,15 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
         j <- k
         # nehme von jedem Listenelement die j-te Komponente
         idx <- sapply(t, function(x) x[j])
-        optimum <- optimize(minimize, c(min(idx), max(idx)))
-        op[k] <- optimum$objective
-        value[k] <- optimum$minimum
+        if(length(unique(idx)) == 1){
+          optimum <- minimize(idx[[1]])
+          op[k] <- optimum
+          value[k] <- idx[[1]]
+        } else{
+          optimum <- optimize(minimize, c(min(idx), max(idx)))
+          op[k] <- optimum$objective
+          value[k] <- optimum$minimum
+        }
       }
 
       opt <- c() # c(j,s)
