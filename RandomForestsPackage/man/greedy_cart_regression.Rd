@@ -4,7 +4,7 @@
 \alias{greedy_cart_regression}
 \title{GREEDY ALGORITHM (Regression)}
 \usage{
-greedy_cart_regression(data)
+greedy_cart_regression(data, depth = 0, num_split = 2, min_num = 1)
 }
 \arguments{
 \item{data}{Tibble that contains Regression Data}
@@ -16,5 +16,5 @@ tree in format: Tibble (BFS)
 Condition to End: Every Leaf contains one Value - 6.15
 }
 \examples{
-greedy_cart_regression(create__random_sample_data_reg(12, 50))
+greedy_cart_regression(create_random_sample_data_reg(12, 50))
 }

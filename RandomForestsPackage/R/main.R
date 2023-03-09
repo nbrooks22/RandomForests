@@ -51,5 +51,55 @@ find_leaf1 <- function(tree){
   return(leafs$node)
 }
 
+#RunDataThroughTree
+make_prediction <- function(tree, x){
+
+  is_not_leaf <- function(this_node_number){
+    this_node <- tree$A[tree$node == this_node_number]
+    if(length(this_node[[1]]) > 1){
+      return(TRUE)
+    }
+    return(FALSE)
+  }
+
+  node_exists <- function(this_node){
+    for (i in 1:length(tree$node)) {
+      if(this_node == tree$node[[i]]){
+        return(TRUE)
+      }
+    }
+    return(FALSE)
+  }
+
+  make_pred <- function(){
+    #current_node is an integer whose value is equal to the nodes position in the full_Tree
+    current_node <- tree$node[tree$name == "root"]
+    while(is_not_leaf(current_node) && (node_exists(current_node*2)) || node_exists((current_node*2)+1)){
+      if(node_exists(current_node*2)){
+        if(x < tree$split_point[tree$node == current_node*2]){
+          newNode <- (tree$node[tree$node == current_node])*2
+          current_node <- tree$node[tree$node == newNode]
+        } else {
+          newNode <- ((tree$node[tree$node == current_node])*2)+1
+          current_node <- tree$node[tree$node == newNode]
+        }
+      } else if (node_exists((current_node*2)+1)){
+        if(x < tree$split_point[tree$node == (current_node*2)+1]){
+          newNode <- (tree$node[tree$node == current_node])*2
+          current_node <- tree$node[tree$node == newNode]
+        } else {
+          newNode <- ((tree$node[tree$node == current_node])*2)+1
+          current_node <- tree$node[tree$node == newNode]
+        }
+      }
+    }
+    return(tree$y[tree$node == current_node])
+  }
+
+  y <- make_pred()
+  return(y);
+}
+
+
 
 

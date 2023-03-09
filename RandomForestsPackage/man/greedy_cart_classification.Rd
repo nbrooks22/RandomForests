@@ -4,7 +4,7 @@
 \alias{greedy_cart_classification}
 \title{GREEDY ALGORITHM (Classification)}
 \usage{
-greedy_cart_classification(data)
+greedy_cart_classification(data, depth = 0, num_split = 2, min_num = 1)
 }
 \arguments{
 \item{data}{Tibble that contains Classification Data}
@@ -16,5 +16,5 @@ tree in format: Tibble (BFS)
 Condition to End: Every Leaf contains one Value - 6.16
 }
 \examples{
-greedy_cart_classification(create__random_sample_data_class(10, 50))
+greedy_cart_classification(create_random_sample_data_class(10, 50))
 }
