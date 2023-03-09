@@ -91,3 +91,30 @@ bagging_classification <- function(data, b, x){
     return(avg)
   }
 }
+
+
+#############################
+# Alina's Code
+bagging <- function(data, B, type = "reg"){
+  tree <- vector("list", B)
+  n <- length(data$y)
+  for(i in 1:B){
+    # ziehe n Stichproben aus data
+    sam <- sample(1:n, n, replace = TRUE)
+    new_data1 <- data$y[sam]
+    new_data2 <- data$x[,sam]
+    new_data <- list(x = new_data2, y = new_data1)
+    
+    # nicht immer nur ein Element in Blatt
+    # auch möglich, dass mehrere Elemente im Blatt sind -> sind dann die gleichen Elemente
+    tree[[i]] <- greedy_cart(x = x, y = y, data = new_data, type = type)
+    # TODO: Muss man hier pruning verwenden anstatt greedy_cart?
+  }
+  tree
+}
+
+
+
+
+
+
