@@ -16,6 +16,8 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
   # min_num = splitte nur, wenn die darauffolgenden leafs eine gewisse Größe haben
   # z.B nur splitten, wenn die daraus entstehenden leafs mind. 5 Elemente besitzen (min_num = 5)
 
+  greedyReg <- new.env()
+  greedyReg$values <- bind_cols(as_tibble_col(as.vector(data$x), column_name = "x"), as_tibble_col(as.vector(data$y), column_name = "y"))
 
   # schreibe Beobachtungen von X in Liste (Elemente sind die Spalten)
   X <- lapply(seq_len(ncol(data$x)), function(i) data$x[,i])
@@ -213,7 +215,9 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
     mutate(y = ifelse(name == "inner node", 0, y)) %>%  # inner Knoten: setze y = 0
     mutate(name = ifelse(node == 1, "root", name)) -> tree # benenne erstes Element in root um
 
-  return(tree)
+  greedyReg$tree <- tree
+
+  return(greedyReg)
 }
 
 
@@ -277,7 +281,7 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
       }
     }
     # nicht durch 0 teilen
-    if(length(A) == 0) return(0)              
+    if(length(A) == 0) return(0)
     return(idx/length(A))
   }
 
