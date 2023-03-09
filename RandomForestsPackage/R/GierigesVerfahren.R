@@ -360,9 +360,21 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
       }
 
       opt <- c() # c(j,s)
-      opt[1] <- which.min(op) # j
-      opt[2] <- value[which.min(op)] # s
+        
+                      
+      # Es kann häufiger mal das selbe Minimum auftreten                
+      min <- which(op == min(op))
+      if(length(min) >= 2){
+        x <- sample(min, 1)
+        opt[1] <- x
+        opt[2] <- value[x]
+      } else{
+        opt[1] <- which.min(op) # j
+        opt[2] <- value[which.min(op)] # s
+      }                
 
+                      
+                      
       c_1 <- c1(opt[1],opt[2],v)
       c_2 <- c2(opt[1],opt[2],v)
 
