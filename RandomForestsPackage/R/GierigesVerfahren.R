@@ -232,6 +232,12 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
 #'
 #' @examples greedy_cart_classification(create_random_sample_data_class(10, 50))
 greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num = 1){
+  greedyCla <- new.env()
+
+  greedyCla$values <- bind_cols(as_tibble_col(as.vector(data$x[1, ]), column_name = "x"),
+                                as_tibble_col(as.vector(data$x[2, ]), column_name = "y"))
+  greedyCla$values <- bind_cols(greedyCla$values, as_tibble_col(data$y, column_name = "classes"))
+
   # analog wie regression
   # schreibe Beobachtungen von X in Liste (Elemente sind die Spalten)
   X <- lapply(seq_len(ncol(data$x)), function(i) data$x[,i])
@@ -364,9 +370,9 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
       }
 
       opt <- c() # c(j,s)
-        
-                      
-      # Es kann häufiger mal das selbe Minimum auftreten                
+
+
+      # Es kann häufiger mal das selbe Minimum auftreten
       min <- which(op == min(op))
       if(length(min) >= 2){
         x <- sample(min, 1)
@@ -375,10 +381,10 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
       } else{
         opt[1] <- which.min(op) # j
         opt[2] <- value[which.min(op)] # s
-      }                
+      }
 
-                      
-                      
+
+
       c_1 <- c1(opt[1],opt[2],v)
       c_2 <- c2(opt[1],opt[2],v)
 
@@ -432,7 +438,9 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
     mutate(y = ifelse(name == "inner node", 0, y)) %>% # inner Knoten: setze y = 0
     mutate(name = ifelse(node == 1, "root", name)) -> tree # benenne erstes Element in root um
 
-  return(tree)
+  greedyCla$tree <- tree
+
+  return(greedyCla)
 }
 
 ######## benötigen library(rlang) für das hier

@@ -4,12 +4,12 @@
 \alias{bagging_classification}
 \title{RANDOM FOREST BAGGING ALGORITHM (Classification)}
 \usage{
-bagging_classification(data, b, t)
+bagging_classification(data, b, x)
 }
 \arguments{
 \item{data}{Tibble that contains Regression Data}
 
-\item{t}{Condition to End: Each tree has t leaves}
+\item{x}{OPTIONAL: If wanting to predict a Value}
 
 \item{m}{Number of Samples that should be aquired}
 }
