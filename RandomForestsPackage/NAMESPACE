@@ -2,6 +2,7 @@
 
 export(bagging_classification)
 export(bagging_regression)
+export(greedy_cart)
 export(greedy_cart_classification)
 export(greedy_cart_regression)
 export(random_forest_classification)

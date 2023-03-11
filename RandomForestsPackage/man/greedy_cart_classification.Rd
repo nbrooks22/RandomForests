@@ -2,19 +2,59 @@
 % Please edit documentation in R/GierigesVerfahren.R
 \name{greedy_cart_classification}
 \alias{greedy_cart_classification}
-\title{GREEDY ALGORITHM (Classification)}
+\title{Greedy Algorithm (Classification)}
 \usage{
 greedy_cart_classification(data, depth = 0, num_split = 2, min_num = 1)
 }
 \arguments{
-\item{data}{Tibble that contains Classification Data}
+\item{data}{a named list that contains classification data\cr the x values have the name x and are in
+the form of a matrix where the rownumber gives the dimension of the data\cr the y
+values have the name y and are in the form of a vector}
+
+\item{depth}{desired depth of the tree}
+
+\item{num_split}{split only nodes which contain at least num_split elements}
+
+\item{min_num}{only split a node, if both child nodes have at least min_num elements}
 }
 \value{
-tree in format: Tibble (BFS)
+An environment with the elements \code{dim}, \code{values} and \code{tree}.\cr
+\code{dim} gives the dimension of the data. \cr
+\code{values} gives back the classification data in a tibble. \cr
+\code{tree} is the tree in the form of a tibble. It has the following columns \cr
+\itemize{
+\item node: node n has the child nodes 2n and 2n + 1
+\item name: type of the node (root, inner node, leaf)
+\item split_index: at which index we split the data
+\item split_point: where we split the data. If node 2n has the split point s
+then all data in this node is less than s. Analog if the node 2n + 1 has the split point s
+then all data in this node is greater than or equal to s.
+\item y: only for leafs; the approximate value for the data in a leaf
+\item A: elements of the data in this node
+\item c_value: the approximate value for the data in a node
+}
 }
 \description{
-Condition to End: Every Leaf contains one Value - 6.16
+Greedy algorithm for classification data
 }
 \examples{
-greedy_cart_classification(create_random_sample_data_class(10, 50))
+X1 <- runif(200,0,1)
+X2 <- runif(200,0,1)
+e <- rnorm(200,0,0.2)
+kappa <- function(x,y) y - 0.5 - 0.3*sin(2*pi*x)
+f <- function(x,y,e){
+  Y <- c()
+  for(i in seq_along(x)){
+    if(kappa(X1[i],X2[i]) - e[i] <= 0){
+      Y[i] <- 1
+    } else{
+      Y[i] <- 2
+    }
+  }
+  Y
+}
+data <- list(x = matrix(c(X1,X2), nrow = 2, byrow = TRUE), y = f(X1,X2,e))
+val <- greedy_cart_classification(data, num_split = 10)
+val$values
+val$tree
 }

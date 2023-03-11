@@ -2,19 +2,47 @@
 % Please edit documentation in R/GierigesVerfahren.R
 \name{greedy_cart_regression}
 \alias{greedy_cart_regression}
-\title{GREEDY ALGORITHM (Regression)}
+\title{Greedy Algorithm (Regression)}
 \usage{
 greedy_cart_regression(data, depth = 0, num_split = 2, min_num = 1)
 }
 \arguments{
-\item{data}{Tibble that contains Regression Data}
+\item{data}{a named list that contains regression data\cr the x values have the name x and are in
+the form of a matrix where the rownumber gives the dimension of the data\cr the y
+values have the name y and are in the form of a vector}
+
+\item{depth}{desired depth of the tree\cr must be greater than 0}
+
+\item{num_split}{split only nodes which contain at least \code{num_split} elements \cr must be greater than 2}
+
+\item{min_num}{only split a node, if both child nodes have at least \code{min_num} elements \cr must be greater than 1}
 }
 \value{
-tree in format: Tibble (BFS)
+An environment with the elements \code{dim}, \code{values} and \code{tree}.\cr
+\code{dim} gives the dimension of the data. \cr
+\code{values} is the regression data in a tibble. \cr
+\code{tree} is the tree in the form of a tibble. It has the following columns \cr
+\itemize{
+\item node: node n has the child nodes 2n and 2n + 1
+\item name: type of the node (root, inner node, leaf)
+\item split_index: at which index we split the data
+\item split_point: where we split the data. If node 2n has the split point s
+then all data in this node is less than s. Analog if the node 2n + 1 has the split point s
+then all data in this node is greater than or equal to s.
+\item y: only for leafs; the approximate value for the data in a leaf
+\item A: elements of the data in this node
+\item c_value: the approximate value for the data in a node
+}
 }
 \description{
-Condition to End: Every Leaf contains one Value - 6.15
+Greedy algorithm for regression data
 }
 \examples{
-greedy_cart_regression(create_random_sample_data_reg(12, 50))
+X <- runif(100,0,1)
+e <- rnorm(100,0,0.2)
+Y <- sin(2*pi*X) + e
+data <- list(x = matrix(X, nrow = 1), y = Y)
+val <- greedy_cart_regression(data, depth = 3)
+val$values
+val$tree
 }
