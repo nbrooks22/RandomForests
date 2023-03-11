@@ -67,7 +67,28 @@ printGreedyCartClassification <- function(data) {
 #                                  Plot Tree
 ####################################################################################
 
+moveSplit <- function(data) {
+  for (row in 1:nrow(data$tree)) {
+    currentNode <- data$tree[row, ]
+    leftChild <- data$tree %>% filter(node == currentNode$node * 2)
+    
+    # Überprüfe, ob linkes Kind existiert
+    if (nrow(leftChild) > 0) {
+      data$tree[row, ]$split_point <- leftChild$split_point
+      data$tree[row, ]$split_index <- leftChild$split_index
+    }
+  }
+  
+  data$tree[data$tree$name == "leaf", ]$split_point <- NA 
+  data$tree[data$tree$name == "leaf", ]$split_index <- NA
+  
+  return(data)
+}
+
+
 plotTree <- function(data) {
+  data <- moveSplit(data)
+  
   parentVector <- c()
   childVector <- c()
   values <- c()
@@ -94,10 +115,6 @@ plotTree <- function(data) {
         if (leftChild$name == "leaf") {
           childVector <- c(childVector, paste0("Position: ",
                                                leftChild$node,
-                                               "\n", "j = ",
-                                               leftChild$split_index,
-                                               ", s = ",
-                                               round(leftChild$split_point, digits = 2),
                                                "\n", "y = ",
                                                round(leftChild$y, digits = 2)
                                                )
@@ -129,10 +146,6 @@ plotTree <- function(data) {
         if (rightChild$name == "leaf") {
           childVector <- c(childVector, paste0("Position: ",
                                                rightChild$node,
-                                               "\n", "j = ",
-                                               rightChild$split_index,
-                                               ", s = ",
-                                               round(rightChild$split_point, digits = 2),
                                                "\n", "y = ",
                                                round(rightChild$y, digits = 2)
                                                )

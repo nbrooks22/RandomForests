@@ -39,7 +39,7 @@ create_random_sample_data_reg <- function(n, m){
 #                 Zufallsdaten Gieriges-Verfahren Klassifikation
 ####################################################################################
 
-create_Sample_data_class <- function(n, m){
+create_random_sample_data_class <- function(n, m){
   set.seed(n)
   X1 <- runif(m,0,1)
   X2 <- runif(m,0,1)

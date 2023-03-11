@@ -36,7 +36,7 @@ server <- function(input, output, session) {
         })
       },
       "Gieriges Verfahren - Klassifikationsproblem" = {
-        data <- create_Sample_data_class(1, countElements)
+        data <- create_random_sample_data_class(1, countElements)
         data <- RandomForestsPackage::greedy_cart_classification(data, depth, numSplit, minNum)
         
         output$plot <- renderPlot({
