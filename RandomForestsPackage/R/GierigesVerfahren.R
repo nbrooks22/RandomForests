@@ -1,14 +1,42 @@
 
-#' GREEDY ALGORITHM (Regression)
+#' Greedy Algorithm (Regression)
 #'
-#' Condition to End: Every Leaf contains one Value - 6.15
+#' Greedy algorithm for regression data
 #'
-#' @param data Tibble that contains Regression Data
+#' @param data a named list that contains regression data\cr the x values have the name x and are in
+#' the form of a matrix where the rownumber gives the dimension of the data\cr the y
+#' values have the name y and are in the form of a vector
+#' @param depth desired depth of the tree\cr must be greater than 0
+#' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than 2
+#' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than 1
 #'
-#' @return tree in format: Tibble (BFS)
+#' @return An environment with the elements `dim`, `values` and `tree`.\cr
+#' `dim` gives the dimension of the data. \cr
+#' `values` is the regression data in a tibble. \cr
+#' `tree` is the tree in the form of a tibble. It has the following columns \cr
+#' \itemize{
+#'    \item node: node n has the child nodes 2n and 2n + 1
+#'    \item name: type of the node (root, inner node, leaf)
+#'    \item split_index: at which index we split the data
+#'    \item split_point: where we split the data. If node 2n has the split point s
+#'    then all data in this node is less than s. Analog if the node 2n + 1 has the split point s
+#'    then all data in this node is greater than or equal to s.
+#'    \item y: only for leafs; the approximate value for the data in a leaf
+#'    \item A: elements of the data in this node
+#'    \item c_value: the approximate value for the data in a node
+#' }
+#'
 #' @export
 #'
-#' @examples greedy_cart_regression(create_random_sample_data_reg(12, 50))
+#' @examples
+#' X <- runif(100,0,1)
+#' e <- rnorm(100,0,0.2)
+#' Y <- sin(2*pi*X) + e
+#' data <- list(x = matrix(X, nrow = 1), y = Y)
+#' val <- greedy_cart_regression(data, depth = 3)
+#' val$values
+#' val$tree
+
 greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
   # depth = Tiefe des Baumes die wir haben wollen
   # num_split = minimale Anzahl an Trainingsdaten die in einem Blatt sein sollen, damit noch gesplittet wird
@@ -17,8 +45,17 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
   # z.B nur splitten, wenn die daraus entstehenden leafs mind. 5 Elemente besitzen (min_num = 5)
 
   greedyReg <- new.env()
-  greedyReg$values <- bind_cols(as_tibble_col(as.vector(data$x), column_name = "x"), as_tibble_col(as.vector(data$y), column_name = "y"))
-
+  
+  row <- nrow(data$x)
+  dat <- t(data$x)
+  tb <- as_tibble(dat)
+  if(row == 1){
+    greedyReg$values <- bind_cols(as_tibble_col(as.vector(data$x), column_name = "x"), as_tibble_col(as.vector(data$y), column_name = "y"))
+  } else{
+    greedyReg$values <- bind_cols(tb, as_tibble_col(as.vector(data$y), column_name = "y"))
+  }
+  
+  greedyReg$dim <- row
   # schreibe Beobachtungen von X in Liste (Elemente sind die Spalten)
   X <- lapply(seq_len(ncol(data$x)), function(i) data$x[,i])
   n <- length(data$y)
@@ -221,22 +258,72 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
 }
 
 
-#' GREEDY ALGORITHM (Classification)
+#' Greedy Algorithm (Classification)
 #'
-#' Condition to End: Every Leaf contains one Value - 6.16
+#' Greedy algorithm for classification data
 #'
-#' @param data Tibble that contains Classification Data
+#' @param data a named list that contains classification data\cr the x values have the name x and are in
+#' the form of a matrix where the rownumber gives the dimension of the data\cr the y
+#' values have the name y and are in the form of a vector
+#' @param depth desired depth of the tree
+#' @param num_split split only nodes which contain at least num_split elements
+#' @param min_num only split a node, if both child nodes have at least min_num elements
 #'
-#' @return tree in format: Tibble (BFS)
+#' @return An environment with the elements `dim`, `values` and `tree`.\cr
+#' `dim` gives the dimension of the data. \cr
+#' `values` gives back the classification data in a tibble. \cr
+#' `tree` is the tree in the form of a tibble. It has the following columns \cr
+#' \itemize{
+#'    \item node: node n has the child nodes 2n and 2n + 1
+#'    \item name: type of the node (root, inner node, leaf)
+#'    \item split_index: at which index we split the data
+#'    \item split_point: where we split the data. If node 2n has the split point s
+#'    then all data in this node is less than s. Analog if the node 2n + 1 has the split point s
+#'    then all data in this node is greater than or equal to s.
+#'    \item y: only for leafs; the approximate value for the data in a leaf
+#'    \item A: elements of the data in this node
+#'    \item c_value: the approximate value for the data in a node
+#' }
+#'
 #' @export
 #'
-#' @examples greedy_cart_classification(create_random_sample_data_class(10, 50))
+#' @examples
+#' X1 <- runif(200,0,1)
+#' X2 <- runif(200,0,1)
+#' e <- rnorm(200,0,0.2)
+#' kappa <- function(x,y) y - 0.5 - 0.3*sin(2*pi*x)
+#' f <- function(x,y,e){
+#'   Y <- c()
+#'   for(i in seq_along(x)){
+#'     if(kappa(X1[i],X2[i]) - e[i] <= 0){
+#'       Y[i] <- 1
+#'     } else{
+#'       Y[i] <- 2
+#'     }
+#'   }
+#'   Y
+#' }
+#' data <- list(x = matrix(c(X1,X2), nrow = 2, byrow = TRUE), y = f(X1,X2,e))
+#' val <- greedy_cart_classification(data, num_split = 10)
+#' val$values
+#' val$tree
 greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num = 1){
   greedyCla <- new.env()
+  
+  row <- nrow(data$x)
+  greedyCla$dim <- row
+ 
+  dat <- t(data$x)
+  tb <- as_tibble(dat)
+  if(row == 2){
+    greedyCla$values <- bind_cols(as_tibble_col(as.vector(data$x[1, ]), column_name = "x"), 
+                                  as_tibble_col(as.vector(data$x[2, ]), column_name = "y"))
+    greedyCla$values <- bind_cols(greedyCla$values, as_tibble_col(data$y, column_name = "classes"))
+  } else{
+    greedyCla$values <- bind_cols(tb, as_tibble_col(as.vector(data$y), column_name = "classes"))
+  }
 
-  greedyCla$values <- bind_cols(as_tibble_col(as.vector(data$x[1, ]), column_name = "x"),
-                                as_tibble_col(as.vector(data$x[2, ]), column_name = "y"))
-  greedyCla$values <- bind_cols(greedyCla$values, as_tibble_col(data$y, column_name = "classes"))
+
 
   # analog wie regression
   # schreibe Beobachtungen von X in Liste (Elemente sind die Spalten)
@@ -443,8 +530,67 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
   return(greedyCla)
 }
 
-######## benötigen library(rlang) für das hier
-# regression und classification in eine Funktion schreiben
+
+#' Greedy Algorithm
+#'
+#' Greedy algorithm for either regression or classification data
+#'
+#' @param x column/list name(s) of the x value(s)
+#' @param y column/list name of the y value
+#' @param data tibble or named list with data
+#' @param type "reg" for regression tree\cr "class" for classification tree
+#' @param depth desired depth of the tree \cr must be greater than 0
+#' @param num_split split only nodes which contain at least num_split elements \cr must be greater than 2
+#' @param min_num only split a node, if both child nodes have at least min_num elements \cr must be greater than 1
+#'
+#'
+#' @return An environment with the elements `dim`, `values` and `tree`.\cr
+#' `dim` gives the dimension of the data. \cr
+#' `values` gives back the data in a tibble. \cr
+#' `tree` is the tree in the form of a tibble. It has the following columns \cr
+#' \itemize{
+#'    \item node: node n has the child nodes 2n and 2n + 1
+#'    \item name: type of the node (root, inner node, leaf)
+#'    \item split_index: at which index we split the data
+#'    \item split_point: where we split the data. If node 2n has the split point s
+#'    then all data in this node is less than s. Analog if the node 2n + 1 has the split point s
+#'    then all data in this node is greater than or equal to s.
+#'    \item y: only for leafs; the approximate value for the data in a leaf
+#'    \item A: elements of the data in this node
+#'    \item c_value: the approximate value for the data in a node
+#' }
+#'
+#' @export
+#' @examples
+#' X <- runif(100,0,1)
+#' e <- rnorm(100,0,0.2)
+#' Y <- sin(2*pi*X) + e
+#' data <- list(a = X, b = Y)
+#' val <- greedy_cart(x = a, y = b, data = data, type = "reg")
+#' val$values
+#' val$tree
+#'
+#' X1 <- runif(200,0,1)
+#' X2 <- runif(200,0,1)
+#' e <- rnorm(200,0,0.05)
+#' k <- function(x,y) (x-0.5)*(y-0.5)
+#' g <- function(x,y,e){
+#'   Y <- c()
+#'   for(i in seq_along(x)){
+#'    if(k(X1[i],X2[i]) - e[i] <= 0){
+#'      Y[i] <- 1
+#'     } else{
+#'       Y[i] <- 2
+#'     }
+#'   }
+#'   Y
+#' }
+#' tbl <- tibble(x1 = X1, x2 = X2, y = g(X1,X2,e))
+#' val <- greedy_cart(x = c(x1,x2), y = y, data = tbl, type = "class", depth = 3)
+#' val$values
+#' val$tree
+                      
+                      
 greedy_cart <- function(x,y,data, type = "reg", depth = 0, num_split = 2, min_num = 1){
   # Daten umformatieren
   # hier kann man auch schauen, ob die Daten
@@ -459,15 +605,19 @@ greedy_cart <- function(x,y,data, type = "reg", depth = 0, num_split = 2, min_nu
   # Typüberprüfung:
   # Daten (X) sollten Zahlen sein
   stopifnot("x must be numeric" = is.numeric(data1))
-  # bei classification kann Y auch TRUE/FALSE sein
-  # (wird dann dementsprechend mit 1/0 übersetzt)
+
   if(type == "reg") stopifnot("y must be numeric" = is.numeric(data2))
-  if(type == "class") stopifnot("y must be numeric or logical" = is.numeric(data2)|is.logical(data2))
+  if(type == "class") stopifnot("y must be numeric" = is.numeric(data2))
   # x und y sollen richtige Länge haben
   # x ist ein vielfaches der Länge von y
   stopifnot("x and y don't have compatible length" = as.integer(length(data1)/length(data2))*length(data2) == length(data1))
 
+  # Überprüfung der Argumente
+  stopifnot("depth must be greater than or equal to 0" = depth >= 0)
+  stopifnot("num_split must be greater than or equal to 2" = num_split >= 2)
+  stopifnot("min_num must be greater than or equal to 1" = min_num >= 1)
 
+  
   m <- matrix(data1, nrow = length(data1)/length(data2), byrow = TRUE)
   dat <- list(x = m, y = data2)
   if(type == "reg"){
@@ -480,32 +630,4 @@ greedy_cart <- function(x,y,data, type = "reg", depth = 0, num_split = 2, min_nu
 }
 
 
-### Beispiel Dateneingabe:
-# X <- runif(m,0,1)
-# e <- rnorm(m,0,0.2)
-# Y <- sin(2*pi*X) + e
-## Regression (eindimensional)
-# data1 <- list(a = X, b = Y)
-# greedy_cart(x = a, y = b, data = data1, type = "reg")
-## Regression (zweidimensional)
-# data2 <- list(a = X, b = -X, c = Y) a ist x1 Koordinate, b ist x2 Koordinate
-# greedy_cart(x = c(a,b), y = c, data = data2, type = "reg")
-## Klassifikation
-# X1 <- runif(100,0,1)
-# X2 <- runif(100,0,1)
-# e <- rnorm(100,0,0.2)
-# kappa <- function(x,y) y - 0.5 - 0.3*sin(2*pi*x)
-# f <- function(x,y,e){
-#   Y <- c()
-#   for(i in seq_along(x)){
-#     if(kappa(X1[i],X2[i]) - e[i] <= 0){
-#       Y[i] <- 1
-#     } else{
-#       Y[i] <- 2
-#     }
-#   }
-#   Y
-# }
-# data3 <- tibble(x1 = X1, x2 = X2, y = f(X1,X2,e))
-# greedy_cart(x = c(x1,x2), y = y, data = data3, type = "class")
 
