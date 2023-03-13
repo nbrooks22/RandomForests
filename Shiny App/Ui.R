@@ -14,15 +14,15 @@ ui <- fluidPage(
                                 label = "Wähle ein Beispiel",
                                 choices = list("Gieriges Verfahren - Regressionsproblem",
                                                "Gieriges Verfahren - Klassifikationsproblem",
-                                               "Pruning (Not implemented yet)",
-                                               "Bagging (Not implemented yet)",
-                                               "Random Forests (Not implemented yet)"),
+                                               "Pruning",
+                                               "Bagging",
+                                               "Random Forests"),
                                 selected = 1),
 
                     tags$div(title = "Bestimmt die Anzahl der Trainingsdaten zufällig.",
                              sliderInput("numberOfElements",
                                          label = "Anzahl der zufälligen Daten",
-                                         min = 1, max = 500, value = 20)
+                                         min = 1, max = 500, value = 50)
                     ),
                     
                     tags$div(title = "Die eingegebene Zahl bestimmt die Tiefe des Baumes. 0 entspricht, dass er die maximale Größe besitzen wird.",
@@ -46,6 +46,39 @@ ui <- fluidPage(
                                           min = 1)
                     ),
                     
+                    tags$div(title="Beende das Verfahren, sobald n Blätter berechnet wurden. 0 bedeutet, dass die maximal mögliche Anzahl berechnet wird.",
+                             numericInput("numLeaf1",
+                                          "Maximale Anzahl an Blätter",
+                                          value = 0,
+                                          min = 0)
+                    ),
+                    
+                    tags$div(title="Gewichtung der Blätter.",
+                             hidden(
+                               textOutput("helpTextForPruningAndRandomForests1"),
+                               numericInput("lambdaVar1",
+                                            "Lambda",
+                                            value = 0,
+                                            min = 0)
+                             )
+                    ),
+                    
+                    tags$div(title="Anzahl Koordinaten zur Auswahl.",
+                             hidden(
+                               numericInput("mVar1",
+                                            "Anzahl Koordinaten zur Auswahl",
+                                            value = 0)
+                             )
+                    ),
+                    
+                    tags$div(title="Anzahl der Blätter",
+                             hidden(
+                               numericInput("tVar1",
+                                            "Anzahl der Blätter",
+                                            value = 0)
+                             )
+                    ),
+                    
                     fluidRow(column(12, align = "center",
                                     actionButton("update1", "Update", icon("rotate"),
                                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
@@ -58,7 +91,7 @@ ui <- fluidPage(
                   # ...für Nutzereingaben
                   
                   sidebarPanel(
-                    tags$div(title="Regression: Die CSV Datei besitzt in der ersten Spalte n x-Werte. Die zweite Spalte besitzt n y-Werte, wobei n eine natürliche Zahl ist.\n\nKlassifikation: Die CSV Datei besitzt in den ersten beiden Spalten n x1-Werte bzw. n x2-Werte und in der dritten Spalte n y-Werte, wobei n eine natürliche Zahl ist und y die zugehörige Klasse.",
+                    tags$div(title="Regression: Die CSV Datei besitzt m Spalten mit n x-Werte. Die letzte Spalte besitzt n y-Werte, wobei n eine natürliche Zahl ist.\n\nKlassifikation: Die CSV Dateibesitzt m >= 2 Spalten mit n x-Werte und in der letzten Spalte n y-Werte, wobei n eine natürliche Zahl ist und y die zugehörige Klasse.",
                              fileInput("file", "CSV-Datei einlesen", accept = ".csv"),
                     ),
                     
@@ -66,9 +99,9 @@ ui <- fluidPage(
                                 label = "Wähle ein Algorithmus",
                                 choices = list("Gieriges Verfahren - Regressionsproblem",
                                                "Gieriges Verfahren - Klassifikationsproblem",
-                                               "Pruning (Not implemented yet)",
-                                               "Bagging (Not implemented yet)",
-                                               "Random Forests (Not implemented yet)"),
+                                               "Pruning",
+                                               "Bagging",
+                                               "Random Forests"),
                                 selected = 1),
                     
                     tags$div(title = "Die eingegebene Zahl bestimmt die Tiefe des Baumes. 0 entspricht, dass er die maximale Größe besitzen wird.",
@@ -90,6 +123,39 @@ ui <- fluidPage(
                                           "Mindestgröße der Blätter",
                                           value = 1,
                                           min = 1)
+                    ),
+                    
+                    tags$div(title="Beende das Verfahren, sobald n Blätter berechnet wurden. 0 bedeutet, dass die maximal mögliche Anzahl berechnet wird.",
+                             numericInput("numLeaf2",
+                                          "Maximale Anzahl an Blätter",
+                                          value = 0,
+                                          min = 0)
+                    ),
+                    
+                    tags$div(title="Gewichtung der Blätter.",
+                             hidden(
+                               textOutput("helpTextForPruningAndRandomForests2"),
+                               numericInput("lambdaVar2",
+                                            "Lambda",
+                                            value = 0,
+                                            min = 0)
+                             )
+                    ),
+                    
+                    tags$div(title="Anzahl Koordinaten zur Auswahl.",
+                             hidden(
+                               numericInput("mVar2",
+                                            "Anzahl Koordinaten zur Auswahl",
+                                            value = 0)
+                             )
+                    ),
+                    
+                    tags$div(title="Anzahl der Blätter",
+                             hidden(
+                               numericInput("tVar2",
+                                            "Anzahl der Blätter",
+                                            value = 0)
+                             )
                     ),
                     
                     fluidRow(column(12, align = "center",

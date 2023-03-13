@@ -7,19 +7,30 @@ readCSV <- function(file, type) {
   
   # Regression
   if (type == 0) {
-    X <- data %>% pull(colnames(data)[1])
-    Y <- data %>% pull(colnames(data)[2])
+    X <- c()
     
-    return (list(x = matrix(X, nrow = 1), y = Y))
+    for (col in 1:(ncol(data) - 1)) {
+      XNew <- data %>% pull(colnames(data)[col])
+      X <- c(X, XNew)
+    }
+    
+    Y <- data %>% pull(colnames(data)[ncol(data)])
+    
+    return (list(x = matrix(X, nrow = ncol(data) - 1), y = Y))
   }
   
   # Klassifikation
   if (type == 1) {
-    X1 <- data %>% pull(colnames(data)[1])
-    X2 <- data %>% pull(colnames(data)[2])
-    Y <- data %>% pull(colnames(data)[3])
+    X <- c()
     
-    return(list(x = matrix(c(X1,X2),nrow = 2, byrow = TRUE), y = Y))
+    for (col in 1:(ncol(data) - 1)) {
+      XNew <- data %>% pull(colnames(data)[col])
+      X <- c(X, XNew)
+    }
+    
+    Y <- data %>% pull(colnames(data)[ncol(data)])
+    
+    return(list(x = matrix(C, nrow = ncol(data) - 1, byrow = TRUE), y = Y))
   }
 }
 
