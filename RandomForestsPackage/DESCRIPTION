@@ -2,13 +2,13 @@ Package: RandomForestsPackage
 Title: Create random forests 
 Version: 0.0.0.9000
 Authors@R: 
-   c( person("Alina", "Telge", , "first.last@example.com", role = c("aut", "cre"), 
+   c( person("Alina", "Telge", , "alina.telge@stud.uni-heidelberg.de", role = c("aut", "cre"), 
    comment = c(ORCID = "YOUR-ORCID-ID"),
       person("Dustin", "Wenchel", "wenchel@stud.uni-heidelberg.de", role = c("aut","cre"),
       comment = c(ORCID = "YOUR-ORCID-ID"),
-      person("Niko", "Brooks", , "first.last@example.com", role = c("aut", "cre"), 
+      person("Nikolai", "Brooks", , "nikolai.brooks@stud.uni-heidelberg.de", role = c("aut", "cre"), 
       comment = c(ORCID = "YOUR-ORCID-ID"),
-      person("Patrick", "Schaffrath", , "first.last@example.com", role = c("aut", "cre"),
+      person("Patrick", "Schaffrath", , "patrick.schaffrath@stud.uni-heidelberg.de", role = c("aut", "cre"),
       comment = c(ORCID = "YOUR-ORCID-ID"))
 Description:    For regression and classification problems this package allows the user to create
                 CARTS (Classification and regression trees) through different methods. Functions 
