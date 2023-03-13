@@ -1,4 +1,5 @@
 library(tidyverse)
+library(rlang)
 
 # Greedy CART
 
@@ -20,6 +21,21 @@ create_realistic_sample_data_reg <- function(){
 #CREATE SIMPLIFIED SAMPLE DATA FOR REGRESSION (As Matrix)
 create_simplified_sample_data_reg <- function(){
   return (data_simplified <- list(x = matrix(c(1,3,5), nrow = 1), y = c(0,0,100)))
+}
+
+#CREATE RANDOM SAMPLE DATA FOR REGRESSION with n dimensions (As Matrix) - function(SEED n, #VALUES m, DIM dim > 1)
+create_random_sample_data_reg_dim <- function(n, m, dim){
+  set.seed(n)
+  e <- rnorm(m,0,0.2)
+  X <- c()
+  for (i in 1:dim) {
+    X <- append(X, runif(m,0,1))
+    if(i == 1){
+      Y <- sin(2*pi*X) + e
+    }
+  }
+
+  return (list(x = matrix(X, nrow = dim), y = Y))
 }
 
 #CREATE SAMPLE DATA FOR CLASSIFICATION (As Matrix) - function(SEED n (NOT ADDED CURRENTLY: #VALUES m))
@@ -76,7 +92,8 @@ make_prediction <- function(tree, x){
     current_node <- tree$node[tree$name == "root"]
     while(is_not_leaf(current_node) && (node_exists(current_node*2)) || node_exists((current_node*2)+1)){
       if(node_exists(current_node*2)){
-        if(x < tree$split_point[tree$node == current_node*2]){
+        current_dim <- tree$split_index[tree$node == current_node*2]
+        if(x[current_dim] < tree$split_point[tree$node == current_node*2]){
           newNode <- (tree$node[tree$node == current_node])*2
           current_node <- tree$node[tree$node == newNode]
         } else {
@@ -84,7 +101,9 @@ make_prediction <- function(tree, x){
           current_node <- tree$node[tree$node == newNode]
         }
       } else if (node_exists((current_node*2)+1)){
-        if(x < tree$split_point[tree$node == (current_node*2)+1]){
+        current_dim <- tree$split_index[tree$node == current_node*2+1]
+
+        if(x[current_dim] < tree$split_point[tree$node == (current_node*2)+1]){
           newNode <- (tree$node[tree$node == current_node])*2
           current_node <- tree$node[tree$node == newNode]
         } else {

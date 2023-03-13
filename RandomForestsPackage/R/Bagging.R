@@ -9,35 +9,45 @@
 #' @return tree in format: Tibble (BFS)
 #' @export
 #'
-#' @examples
-bagging_regression <- function(data, b, x){
+#' @examples bagging_regression(create_random_sample_data_reg_dim(5, 100, 4), 3, c(0.1, 0.2, 0.9, 0.4))
+bagging_regression <- function(data, b, pred_val){
 
   list_of_bags <- list()
   list_of_trees <- list()
-  tibble_of_values <- as_tibble(rbind(matrix(data$x, nrow = 1), data$y))
-  amount_per_bag <- round((length(tibble_of_values)/b))
-
+  dims <- length(data$x[,1])
+  tibble_of_values <- as_tibble(rbind(matrix(data$x, nrow = dims), data$y))
 
 
   #Data: All Data(Replacement), X: percentage of data to sample
   create_bag <- function(data, b, list_of_bags){
-    bagOfData <- sample(data, amount_per_bag, replace = TRUE)
+    bagOfData <- sample(data, length(data[1,]), replace = TRUE)
     return(bagOfData)
   }
 
   #For Each Bag, make a corresponding Tree
   for (i in 1:b) {
-    list_of_bags[[length(list_of_bags)+1]] <- create_bag(tibble_of_values, amount_per_bag, list_of_bags)
-    temp_tibble <- rename(as_tibble(t(list_of_bags[[i]])),x = V1, y = V2)
-    list_of_trees[[length(list_of_trees)+1]] <- greedy_cart_regression(list(x = matrix((temp_tibble$x), nrow = 1), y = temp_tibble$y))
+    list_of_bags[[length(list_of_bags)+1]] <- create_bag(tibble_of_values, length(data$y), list_of_bags)
+    temp_tibble <- as_tibble(t(list_of_bags[[i]]))
+
+    x <- matrix(temp_tibble$V1, nrow = 1)
+    if(length(data$x[,1]) > 1){
+      for (j in 2:length(data$x[,1])) {
+        x <- rbind(x, temp_tibble[[j]])
+      }
+    }
+    list_of_trees[[length(list_of_trees)+1]] <- greedy_cart_regression(list(x = x, y = temp_tibble[[dims+1]]))
   }
 
-  #For each Tree, make a Prediction. Then Average them
-  if(hasArg(x)){
+  #For each Tree, make a Prediction (if provided). Then Average them
+  if(hasArg(pred_val)){
+    if(as_integer(length(pred_val)) != as_integer(dims)){
+      stop("The dimensions of the prediction are not equal to the dimensions of the given data x-values!")
+    }
+
     c <- c()
 
     for (i in 1:b) {
-     c  <- append(c, make_prediction(list_of_trees[[i]], x))
+     c  <- append(c, make_prediction(list_of_trees[[i]]$tree, pred_val))
     }
 
     avg <- mean(c)
@@ -57,61 +67,52 @@ bagging_regression <- function(data, b, x){
 #' @return tree in format: Tibble (BFS)
 #' @export
 #'
-#'
-bagging_classification <- function(data, b, x){
+#' @examples bagging_classification(create_Sample_data_class(1), 4, c(0.1,0.5, 0.6))
+bagging_classification <- function(data, b, pred_val){
   list_of_bags <- list()
   list_of_trees <- list()
-  tibble_of_values <- as_tibble(rbind(matrix(data$x, nrow = 1), data$y))
-  amount_per_bag <- (length(tibble_of_values)/b)
-
+  dims <- length(data$x[,1])
+  tibble_of_values <- as_tibble(rbind(matrix(data$x, nrow = dims), data$y))
 
 
   #Data: All Data(Replacement), X: percentage of data to sample
   create_bag <- function(data, b, list_of_bags){
-    bagOfData <- sample(data, amount_per_bag, replace = TRUE)
+    bagOfData <- sample(data, length(data[1,]), replace = TRUE)
     return(bagOfData)
   }
 
   #For Each Bag, make a corresponding Tree
   for (i in 1:b) {
-    list_of_bags[[length(list_of_bags)+1]] <- create_bag(tibble_of_values, amount_per_bag, list_of_bags)
-    temp_tibble <- rename(as_tibble(t(list_of_bags[[i]])), x = V1, y = V2)
-    list_of_trees[length(list_of_trees)+1] <- greedy_cart_classification(list(x = matrix((temp_tibble$x), nrow = 1), y = temp_tibble$y))
+    list_of_bags[[length(list_of_bags)+1]] <- create_bag(tibble_of_values, length(data$y), list_of_bags)
+    temp_tibble <- as_tibble(t(list_of_bags[[i]]))
+
+    x <- matrix(temp_tibble$V1, nrow = 1)
+    if(length(data$x[,1]) > 1){
+      for (j in 1:length(data$x[,1])) {
+        x <- rbind(x, temp_tibble[[j]])
+      }
+    }
+    list_of_trees[[length(list_of_trees)+1]] <- greedy_cart_classification(list(x = x, y = temp_tibble[[dims+1]]))
   }
 
 
   #For each Tree, make a Prediction. Then Average them
-  if(hasArg(x)){
+  if(hasArg(pred_val)){
+    if(as_integer(length(pred_val)) != as_integer(dims+1)){
+      stop("The dimensions of the prediction are not equal to the dimensions of the given data x-values!")
+    }
     c <- c()
-
+    i <- 0
     for (i in 1:b) {
-      c  <- append(c, make_prediction(list_of_trees[[i]], x))
+      c  <- append(c, make_prediction(list_of_trees[[i]]$tree, pred_val))
     }
     avg <- sort(table(c),decreasing=TRUE)[1]
-    return(avg)
+    return(c[avg])
   }
 }
 
 
-#############################
-# Alina's Code
-bagging <- function(data, B, type = "reg"){
-  tree <- vector("list", B)
-  n <- length(data$y)
-  for(i in 1:B){
-    # ziehe n Stichproben aus data
-    sam <- sample(1:n, n, replace = TRUE)
-    new_data1 <- data$y[sam]
-    new_data2 <- data$x[,sam]
-    new_data <- list(x = new_data2, y = new_data1)
-    
-    # nicht immer nur ein Element in Blatt
-    # auch möglich, dass mehrere Elemente im Blatt sind -> sind dann die gleichen Elemente
-    tree[[i]] <- greedy_cart(x = x, y = y, data = new_data, type = type)
-    # TODO: Muss man hier pruning verwenden anstatt greedy_cart?
-  }
-  tree
-}
+
 
 
 

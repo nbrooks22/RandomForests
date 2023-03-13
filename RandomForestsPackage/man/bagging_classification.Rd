@@ -4,18 +4,21 @@
 \alias{bagging_classification}
 \title{RANDOM FOREST BAGGING ALGORITHM (Classification)}
 \usage{
-bagging_classification(data, b, x)
+bagging_classification(data, b, pred_val)
 }
 \arguments{
 \item{data}{Tibble that contains Regression Data}
 
-\item{x}{OPTIONAL: If wanting to predict a Value}
-
 \item{m}{Number of Samples that should be aquired}
+
+\item{x}{OPTIONAL: If wanting to predict a Value}
 }
 \value{
 tree in format: Tibble (BFS)
 }
 \description{
 Condition to End: The Tree has t leaves - 6.52
+}
+\examples{
+bagging_classification(create_Sample_data_class(1), 4, c(0.1,0.5, 0.6))
 }

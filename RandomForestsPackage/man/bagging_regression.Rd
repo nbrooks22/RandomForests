@@ -4,7 +4,7 @@
 \alias{bagging_regression}
 \title{RANDOM FOREST BAGGING ALGORITHM (Regression)}
 \usage{
-bagging_regression(data, b, x)
+bagging_regression(data, b, pred_val)
 }
 \arguments{
 \item{data}{Tibble that contains Regression Data}
@@ -18,4 +18,7 @@ tree in format: Tibble (BFS)
 }
 \description{
 Condition to End: The Tree has t leaves - 6.52
+}
+\examples{
+bagging_regression(create_random_sample_data_reg_dim(5, 100, 4), 3, c(0.1, 0.2, 0.9, 0.4))
 }
