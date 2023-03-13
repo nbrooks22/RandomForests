@@ -6,9 +6,13 @@
 #' @param data a named list that contains regression data\cr the x values have the name x and are in
 #' the form of a matrix where the rownumber gives the dimension of the data\cr the y
 #' values have the name y and are in the form of a vector
-#' @param depth desired depth of the tree\cr must be greater than 0
-#' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than 2
-#' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than 1
+#' @param depth Condition to end: the tree hast depth `depth`\cr must be greater than 0
+#' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
+#' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
+#' @param num_leaf Condition to end: the tree has `num_leaf` leaves \cr must be greater than or equal to 1
+#' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration \cr
+#' must be smaller than the dimension of the data (if dimension is \eqn{>=} 2) or must be equal to the dimension of the data (if dimension is \eqn{=} 1) \cr
+#' the default value is the dimension of the data
 #'
 #' @return An environment with the elements `dim`, `values` and `tree`.\cr
 #' `dim` gives the dimension of the data. \cr
@@ -37,16 +41,31 @@
 #' val$values
 #' val$tree
 
-greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
+greedy_cart_regression <- function(data, num_leaf = NULL, depth = 0, num_split = 2, min_num = 1, m = 0){
   # depth = Tiefe des Baumes die wir haben wollen
   # num_split = minimale Anzahl an Trainingsdaten die in einem Blatt sein sollen, damit noch gesplittet wird
   # bei num_split wird noch gesplittet, bei num_split - 1 nicht mehr
   # min_num = splitte nur, wenn die darauffolgenden leafs eine gewisse Größe haben
   # z.B nur splitten, wenn die daraus entstehenden leafs mind. 5 Elemente besitzen (min_num = 5)
 
-  greedyReg <- new.env()
+  if(is.null(num_leaf)) num_leaf <- length(data$y)
+  t <- num_leaf
+  d <- nrow(data$x)
+
+  
+  stopifnot("depth must be greater than or equal to 0" = depth >= 0)
+  stopifnot("num_split must be greater than or equal to 2" = num_split >= 2)
+  stopifnot("min_num must be greater than or equal to 1" = min_num >= 1)
+  stopifnot("num_leaf must be greater than or equal to 1" = num_leaf >= 1)
   
   row <- nrow(data$x)
+  stopifnot("m is too big" = m <= row)
+  if(m == 0) m <- row 
+  stopifnot("m must be greater than 0" = m > 0)
+  
+  greedyReg <- new.env()
+  
+  
   dat <- t(data$x)
   tb <- as_tibble(dat)
   if(row == 1){
@@ -127,7 +146,7 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
     depth_count <- 0
   }
 
-  while(!all(cond %in% 0:(num_split - 1)) & depth_count < depth){
+  while(!all(cond %in% 0:(num_split - 1)) & length(find_leaf1(tree)) <= t - 1 & depth_count < depth){
     # speichere den tree. Ist wichtig für num_split
     # -> Abbruchbedingung: wenn sich der Tree nicht geändert hat, d.h keine neuen Blätter hinzugekommen sind -> abbrechen
     tree1 <- tree
@@ -166,16 +185,19 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
       # s in IR
 
       # suche für alle j das Minimum: und minimiere dann darüber
-      op <- c()
-      value <- c()
-      t <- tree[tree$node == v,]$A[[1]]
+      op <- rep(NA, d)
+      value <- rep(NA, d)
+      t1 <- tree[tree$node == v,]$A[[1]]
       # objective = minimaler Wert
       # minimum = argmin
       # minimum nicht in den ganzen Daten von x (data$x) suchen, nur in A(v)
-      for(k in 1:nrow(data$x)){
+      
+      S <- sample(1:d,m)
+      S <- sort(S)                
+      for(k in S){
         j <- k
         # nehme von jedem Listenelement die j-te Komponente
-        idx <- sapply(t, function(x) x[j])
+        idx <- sapply(t1, function(x) x[j])
         # schauen, ob idx nur gleiche Elemente hat
         if(length(unique(idx)) == 1){
           optimum <- minimize(idx[[1]])
@@ -194,21 +216,29 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
 
       c_1 <- c1(opt[1],opt[2],v)
       c_2 <- c2(opt[1],opt[2],v)
-
+      
       # füge die neuen Zeilen (Blätter) in tree ein
       # nur, wenn # A1 und # A2 >= min_num sind
       A_1 <- A1(opt[1],opt[2],v)
       A_2 <- A2(opt[1],opt[2],v)
+      num_leafs <- length(find_leaf1(tree))                
+      # Füge ersten Knoten an, und schaue ob wir jetzt t Blätter haben
+                
       if(length(A_1) >= min_num & length(A_2) >= min_num){
-        tree %>%
-          add_row(node = 2*v, split_index = opt[1], split_point = opt[2], c_value = c_1) %>%
-          add_row(node = 2*v + 1, split_index = opt[1], split_point = opt[2], c_value = c_2) -> tree
-        tree[tree$node == 2*v,]$A[[1]] <- A1(opt[1],opt[2],v)
-        tree[tree$node == 2*v + 1,]$A[[1]] <- A2(opt[1],opt[2],v)
-        # benenne leafs in leaf um (im Tibble)
-        tree %>%
-          mutate(name = ifelse(node == v, "inner node", ifelse(node == 2*v, "leaf", ifelse(node == 2*v + 1, "leaf", name)))) -> tree
-
+        if(num_leafs == t){
+          break
+        } else{
+          tree %>%
+            add_row(node = 2*v, split_index = opt[1], split_point = opt[2], c_value = c_1) %>%
+            add_row(node = 2*v + 1, split_index = opt[1], split_point = opt[2], c_value = c_2) -> tree
+          tree[tree$node == 2*v,]$A[[1]] <- A1(opt[1],opt[2],v)
+          tree[tree$node == 2*v + 1,]$A[[1]] <- A2(opt[1],opt[2],v)
+          # benenne leafs in leaf um (im Tibble)
+          tree %>% 
+            mutate(name = ifelse(node == v, "inner node", ifelse(node == 2*v, "leaf", ifelse(node == 2*v + 1, "leaf", name)))) -> tree
+          
+        }
+        
       }
     }
 
@@ -265,9 +295,14 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
 #' @param data a named list that contains classification data\cr the x values have the name x and are in
 #' the form of a matrix where the rownumber gives the dimension of the data\cr the y
 #' values have the name y and are in the form of a vector
-#' @param depth desired depth of the tree
-#' @param num_split split only nodes which contain at least num_split elements
-#' @param min_num only split a node, if both child nodes have at least min_num elements
+#' @param depth Condition to end: the tree hast depth `depth`\cr must be greater than 0
+#' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
+#' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
+#' @param num_leaf Condition to end: the tree has `num_leaf` leaves \cr must be greater than or equal to 1
+#' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration \cr
+#' must be smaller than the dimension of the data (if dimension is \eqn{>=} 2) or must be equal to the dimension of the data (if dimension is \eqn{=} 1) \cr
+#' the default value is the dimension of the data
+#'
 #'
 #' @return An environment with the elements `dim`, `values` and `tree`.\cr
 #' `dim` gives the dimension of the data. \cr
@@ -307,10 +342,26 @@ greedy_cart_regression <- function(data, depth = 0, num_split = 2, min_num = 1){
 #' val <- greedy_cart_classification(data, num_split = 10)
 #' val$values
 #' val$tree
-greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num = 1){
-  greedyCla <- new.env()
+greedy_cart_classification <- function(data, num_leaf = NULL, depth = 0, num_split = 2, min_num = 1, m = 0){
+  
+  if(is.null(num_leaf)) num_leaf <- length(data$y)
+  t <- num_leaf
+  d <- nrow(data$x)
+
+  
+  
+  stopifnot("depth must be greater than or equal to 0" = depth >= 0)
+  stopifnot("num_split must be greater than or equal to 2" = num_split >= 2)
+  stopifnot("min_num must be greater than or equal to 1" = min_num >= 1)
+  stopifnot("num_leaf must be greater than or equal to 1" = num_leaf >= 1)
   
   row <- nrow(data$x)
+  stopifnot("m is too big" = m <= row)
+  if(m == 0) m <- row 
+  stopifnot("m must be greater than 0" = m > 0)
+  
+  greedyCla <- new.env()
+  
   greedyCla$dim <- row
  
   dat <- t(data$x)
@@ -407,7 +458,7 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
     depth_count <- 0
   }
 
-  while(!all(cond %in% 0:(num_split - 1)) & depth_count < depth){
+  while(!all(cond %in% 0:(num_split - 1)) & length(find_leaf1(tree)) <= t - 1 & depth_count < depth){
 
     tree1 <- tree
     # finde Blätter
@@ -435,16 +486,19 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
       # s in IR
 
       # suche für alle j das Minimum: und minimiere dann darüber
-      op <- c()
-      value <- c()
-      t <- tree[tree$node == v,]$A[[1]]
+      op <- rep(NA, d)
+      value <- rep(NA, d)
+      t1 <- tree[tree$node == v,]$A[[1]]
       # objective = minimaler Wert
       # minimum = argmin
       # minimum nicht in den ganzen Daten von x (data$x) suchen, nur in A(v)
-      for(k in 1:nrow(data$x)){
+      S <- sample(1:d,m)
+      S <- sort(S)
+      
+      for(k in S){
         j <- k
         # nehme von jedem Listenelement die j-te Komponente
-        idx <- sapply(t, function(x) x[j])
+        idx <- sapply(t1, function(x) x[j])
         if(length(unique(idx)) == 1){
           optimum <- minimize(idx[[1]])
           op[k] <- optimum
@@ -479,16 +533,22 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
       # nur, wenn # A1 und # A2 >= min_num sind
       A_1 <- A1(opt[1],opt[2],v)
       A_2 <- A2(opt[1],opt[2],v)
-      if(length(A_1) >= min_num & length(A_2) >= min_num){
-        tree %>%
-          add_row(node = 2*v, split_index = opt[1], split_point = opt[2], c_value = c_1) %>%
-          add_row(node = 2*v + 1, split_index = opt[1], split_point = opt[2], c_value = c_2) -> tree
-        tree[tree$node == 2*v,]$A[[1]] <- A1(opt[1],opt[2],v)
-        tree[tree$node == 2*v + 1,]$A[[1]] <- A2(opt[1],opt[2],v)
-        # benenne leafs in leaf um (im Tibble)
-        tree %>%
-          mutate(name = ifelse(node == v, "inner node", ifelse(node == 2*v, "leaf", ifelse(node == 2*v + 1, "leaf", name)))) -> tree
+      num_leafs <- length(find_leaf1(tree))
 
+      if(length(A_1) >= min_num & length(A_2) >= min_num){
+         if(num_leafs == t){
+          break
+        } else{
+          tree %>%
+            add_row(node = 2*v, split_index = opt[1], split_point = opt[2], c_value = c_1) %>%
+            add_row(node = 2*v + 1, split_index = opt[1], split_point = opt[2], c_value = c_2) -> tree
+          tree[tree$node == 2*v,]$A[[1]] <- A1(opt[1],opt[2],v)
+          tree[tree$node == 2*v + 1,]$A[[1]] <- A2(opt[1],opt[2],v)
+          # benenne leafs in leaf um (im Tibble)
+          tree %>% 
+            mutate(name = ifelse(node == v, "inner node", ifelse(node == 2*v, "leaf", ifelse(node == 2*v + 1, "leaf", name)))) -> tree
+          
+        }
       }
     }
 
@@ -539,9 +599,13 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
 #' @param y column/list name of the y value
 #' @param data tibble or named list with data
 #' @param type "reg" for regression tree\cr "class" for classification tree
-#' @param depth desired depth of the tree \cr must be greater than 0
-#' @param num_split split only nodes which contain at least num_split elements \cr must be greater than 2
-#' @param min_num only split a node, if both child nodes have at least min_num elements \cr must be greater than 1
+#' @param depth Condition to end: the tree hast depth `depth`\cr must be greater than 0
+#' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
+#' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
+#' @param num_leaf Condition to end: the tree has `num_leaf` leaves \cr must be greater than or equal to 1
+#' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration \cr
+#' must be smaller than the dimension of the data (if dimension is \eqn{>=} 2) or must be equal to the dimension of the data (if dimension is \eqn{=} 1) \cr
+#' the default value is the dimension of the data
 #'
 #'
 #' @return An environment with the elements `dim`, `values` and `tree`.\cr
@@ -591,7 +655,7 @@ greedy_cart_classification <- function(data, depth = 0, num_split = 2, min_num =
 #' val$tree
                       
                       
-greedy_cart <- function(x,y,data, type = "reg", depth = 0, num_split = 2, min_num = 1){
+greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = 0, num_split = 2, min_num = 1, m = 0){
   # Daten umformatieren
   # hier kann man auch schauen, ob die Daten
   # in der richtigen Struktur sind
@@ -606,8 +670,10 @@ greedy_cart <- function(x,y,data, type = "reg", depth = 0, num_split = 2, min_nu
   # Daten (X) sollten Zahlen sein
   stopifnot("x must be numeric" = is.numeric(data1))
 
-  if(type == "reg") stopifnot("y must be numeric" = is.numeric(data2))
-  if(type == "class") stopifnot("y must be numeric" = is.numeric(data2))
+  stopifnot("y must be numeric" = is.numeric(data2))
+  # y muss eindimensional sein
+  stopifnot("y must be one-dimensional" = NCOL(data2) == 1)
+  
   # x und y sollen richtige Länge haben
   # x ist ein vielfaches der Länge von y
   stopifnot("x and y don't have compatible length" = as.integer(length(data1)/length(data2))*length(data2) == length(data1))
@@ -618,12 +684,27 @@ greedy_cart <- function(x,y,data, type = "reg", depth = 0, num_split = 2, min_nu
   stopifnot("min_num must be greater than or equal to 1" = min_num >= 1)
 
   
-  m <- matrix(data1, nrow = length(data1)/length(data2), byrow = TRUE)
-  dat <- list(x = m, y = data2)
+  mat <- matrix(data1, nrow = length(data1)/length(data2), byrow = TRUE)
+  dat <- list(x = mat, y = data2)
+  
+  # wenn kein Typ angegeben wurde -> versuche Typ zu erraten
+  if(is.null(type)){
+    y_int <- as.integer(data2)
+    # wenn y natürliche Zahl -> classification
+    if(all(y_int == data2) & all(y_int >= 1)){
+      type <- "class"
+      warning("Type was forgotten. Type was set to classification")
+    } else{
+      type <- "reg"
+      warning("Type was forgotten. Type was set to regression")
+    }
+  }
+
+  
   if(type == "reg"){
-    return(greedy_cart_regression(dat, depth = depth, num_split = num_split, min_num = min_num))
+    return(greedy_cart_regression(dat, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m))
   } else if(type == "class"){
-    return(greedy_cart_classification(dat, depth = depth, num_split = num_split, min_num = min_num))
+    return(greedy_cart_classification(dat, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m))
   } else{
     stop("Invalid type!")
   }

@@ -1,0 +1,138 @@
+---
+title: "Einleitung CART"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Report}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+options(tibble.print_min = 10L, tibble.print_max = 10L)
+```
+
+```{r setup}
+library(RandomForestsPackage)
+library(tidyverse)
+library(rlang)
+set.seed(10)
+```
+## Einleitung
+Das Ziel dieses Paketes ist es mit Hilfe von Entscheidungsbäumen möglichst genaue Vorhersagen aufgrund von gegebenen Beobachtungen zu treffen. Es werden dabei Klassifikations- und Regressionsbäume (CARTs) betrachtet. Das Ziel ist es also die Klasse/den Wert aufgrund von Beobachtungen möglichst genau vorherzusagen (wie zum Beispiel bei einer Regressionsgeraden).
+
+
+## Daten
+Um einen Regressionsbaum zu erstellen, werden folgende Trainingsdaten benutzt
+```{r}
+X <- runif(100,0,1)
+e <- rnorm(100,0,0.2)
+Y <- sin(2*pi*X) + e
+data_reg <- tibble(x = X, y = Y)
+```
+Für den Klassifikationsbaum haben wir folgende Daten
+```{r}
+X1 <- runif(200,0,1)
+X2 <- runif(200,0,1)
+e1 <- rnorm(200,0,0.2)
+kappa <- function(x,y) y - 0.5 - 0.3*sin(2*pi*x)
+f <- function(x,y,e){
+  Y <- c()
+  for(i in seq_along(x)){
+    if(kappa(X1[i],X2[i]) - e[i] <= 0){
+      Y[i] <- 1
+    } else{
+      Y[i] <- 2
+    }
+  }
+  Y
+}
+data_class <- tibble(x1 = X1, x2 = X2, y = f(X1,X2,e1))
+```
+
+
+
+## Funktionen
+Es gibt verschiedene Funktionen um Entscheidungsbäume zu erstellen:
+
+* `greedy_cart()` erstellt einen Baum mittels gierigem Verfahren
+* `pruning()`
+* `bagging()`
+* `random_forest()` erstellt einen Random Forest
+
+Für die Entscheidungsregel/die Schätzung eines Wertes gibt es die folgende Funktion:
+
+* `make_prediction()`
+
+Funktionen um einen Entscheidungsbaum zu visualisieren:
+
+* `printGreedyCartRegression()`
+* `plotTree()`
+
+
+### Erstelle einen Baum mit `greedy_cart()`
+`greedy_cart()` erstellt einen Entscheidungsbaum mit Hilfe des gierigen Verfahrens. Die ersten zwei Argumente geben die Namen der Spalten/Listenelemente an, die man benutzen möchte. Das `data` Argument gibt an aus welchem Tibble/Liste man die Daten nimmt.
+```{r}
+data <- greedy_cart(x = x, y = y, data = data_reg, type = "reg")
+```
+`data` ist eine Umgebung, wobei `data$tree` den Entscheidungsbaum ausgibt, und `data$values` die verwendeten Daten sind. Die Form des Tibbles `data$tree` ist in `?greedy_cart` genauer erklärt.
+`data$dim` ist die Dimension der verwendeten Daten.
+```{r}
+data$tree
+data$values
+data$dim
+```
+
+
+#### Abbruchbedingungen
+Wenn man keine Abbruchbedingung angibt, erhält man einen Baum, der in jedem Blatt nur noch einen Datenpunkt besitzt.
+
+#### `num_leaf`
+Es wird ein Baum mit insgesamt `num_leaf` Blättern erstellt. Hier wird ein Baum mit 10 Blättern erstellt.
+```{r eval = FALSE}
+data <- greedy_cart(x = x, y = y, data = data_reg, type = "reg", num_leaf = 10)
+data$tree
+```
+
+##### `depth`
+Der Baum wird nur bis zur Tiefe `depth` bestimmt. In diesem Fall bricht der Algorithmus ab, wenn der Baum die Tiefe 2 hat.
+```{r eval = FALSE}
+data <- greedy_cart(x = x, y = y, data = data_reg, type = "reg", depth = 2)
+data$tree
+```
+##### `num_split`
+Die minimale Anzahl an Trainingsdaten die in einem Knoten sein soll, damit noch gesplittet wird beträgt `num_split`. Bei 10 Trainingsdaten in einem Knoten wird noch gesplittet, bei 9 und weniger nicht mehr.
+```{r eval = FALSE}
+data <- greedy_cart(x = x, y = y, data = data_reg, type = "reg", num_split = 10)
+data$tree
+```
+##### `min_num`
+Man splittet nur, wenn beide darauffolgenden Blätter aus mindestens `min_num` Elementen bestehen, hier 5 Elemente.
+```{r eval = FALSE}
+data <- greedy_cart(x = x, y = y, data = data_reg, type = "reg", min_num = 5)
+data$tree
+```
+
+Analog funktioniert das gierige Verfahren für Klassifikationsprobleme.
+```{r}
+greedy_cart(x = c(x1, x2), y = y, data = data_class, type = "class", depth = 3)
+
+```
+
+### `pruning()`
+
+### `bagging()`
+
+### `random_forest()`
+`random_forest()` ist eine Verallgemeinerung des `bagging` Algorithmus. Wir wollen in jedem Iterationsschritt `m` = 1 Koordinaten benutzen, insgesamt `B` = 10 Bäume erstellen und für jeden Baum `A` = 50 zufällig ausgewählte Daten verwenden.
+```{r}
+data <- random_forest(x = c(x1,x2), y = y, data = data_class, type = "class", B = 10, A = 50, m = 1, num_leaf = 25)
+```
+
+Die Abbruchbedingungen sind die gleichen wie bei `greedy_cart()`.
+
+
+
