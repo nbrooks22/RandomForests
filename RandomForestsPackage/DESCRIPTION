@@ -24,3 +24,10 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+Imports: 
+    dplyr,
+    ggplot2,
+    readr,
+    rlang,
+    tibble,
+    tidyr
