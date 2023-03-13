@@ -14,9 +14,12 @@ ui <- fluidPage(
                                 label = "Wähle ein Beispiel",
                                 choices = list("Gieriges Verfahren - Regressionsproblem",
                                                "Gieriges Verfahren - Klassifikationsproblem",
-                                               "Pruning",
-                                               "Bagging",
-                                               "Random Forests"),
+                                               "Pruning - Regressionsproblem",
+                                               "Pruning - Klassifikationsproblem",
+                                               "Bagging - Regressionsproblem",
+                                               "Bagging - Klassifikationsproblem",
+                                               "Random Forests - Regressionsproblem",
+                                               "Random Forests - Klassifikationsproblem"),
                                 selected = 1),
 
                     tags$div(title = "Bestimmt die Anzahl der Trainingsdaten zufällig.",
@@ -63,18 +66,18 @@ ui <- fluidPage(
                              )
                     ),
                     
-                    tags$div(title="Anzahl Koordinaten zur Auswahl.",
+                    tags$div(title="Anzahl der Taschen.",
                              hidden(
-                               numericInput("mVar1",
-                                            "Anzahl Koordinaten zur Auswahl",
+                               numericInput("numberOfBags1",
+                                            "Anzahl der Taschen",
                                             value = 0)
                              )
                     ),
                     
-                    tags$div(title="Anzahl der Blätter",
+                    tags$div(title="Anzahl der Daten, die aus der Gesamtanzahl gezogen wird.",
                              hidden(
-                               numericInput("tVar1",
-                                            "Anzahl der Blätter",
+                               numericInput("numberOfDataFromTotal1",
+                                            "Anzahl der Daten",
                                             value = 0)
                              )
                     ),
@@ -99,9 +102,12 @@ ui <- fluidPage(
                                 label = "Wähle ein Algorithmus",
                                 choices = list("Gieriges Verfahren - Regressionsproblem",
                                                "Gieriges Verfahren - Klassifikationsproblem",
-                                               "Pruning",
-                                               "Bagging",
-                                               "Random Forests"),
+                                               "Pruning - Regressionsproblem",
+                                               "Pruning - Klassifikationsproblem",
+                                               "Bagging - Regressionsproblem",
+                                               "Bagging - Klassifikationsproblem",
+                                               "Random Forests - Regressionsproblem",
+                                               "Random Forests - Klassifikationsproblem"),
                                 selected = 1),
                     
                     tags$div(title = "Die eingegebene Zahl bestimmt die Tiefe des Baumes. 0 entspricht, dass er die maximale Größe besitzen wird.",
@@ -142,18 +148,18 @@ ui <- fluidPage(
                              )
                     ),
                     
-                    tags$div(title="Anzahl Koordinaten zur Auswahl.",
+                    tags$div(title="Anzahl der Taschen.",
                              hidden(
-                               numericInput("mVar2",
-                                            "Anzahl Koordinaten zur Auswahl",
+                               numericInput("numberOfBags2",
+                                            "Anzahl der Taschen",
                                             value = 0)
                              )
                     ),
                     
-                    tags$div(title="Anzahl der Blätter",
+                    tags$div(title="Anzahl der Daten, die aus der Gesamtanzahl gezogen wird.",
                              hidden(
-                               numericInput("tVar2",
-                                            "Anzahl der Blätter",
+                               numericInput("numberOfDataFromTotal2",
+                                            "Anzahl der Daten",
                                             value = 0)
                              )
                     ),
