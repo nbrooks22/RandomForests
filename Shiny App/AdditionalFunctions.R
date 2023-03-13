@@ -30,7 +30,7 @@ readCSV <- function(file, type) {
     
     Y <- data %>% pull(colnames(data)[ncol(data)])
     
-    return(list(x = matrix(C, nrow = ncol(data) - 1, byrow = TRUE), y = Y))
+    return(list(x = matrix(X, nrow = ncol(data) - 1, byrow = TRUE), y = Y))
   }
 }
 

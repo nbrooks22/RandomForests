@@ -95,7 +95,6 @@ plotTree <- function(data) {
   
   parentVector <- c()
   childVector <- c()
-  values <- c()
   
   for (row in 1:nrow(data$tree)) {
     currentNode <- data$tree[row, ]
