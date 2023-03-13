@@ -697,8 +697,8 @@ greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = 0, num_s
     } else{
       type <- "reg"
       warning("Type was forgotten. Type was set to regression")
-      
     }
+  }
 
   
   if(type == "reg"){
