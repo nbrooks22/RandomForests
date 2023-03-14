@@ -1,4 +1,3 @@
-
 #' Count leaves for a given CART
 #'
 #' @param data A tibble containing the information of each node type of the CART in the colum "name".
@@ -121,6 +120,6 @@ pruning_regression <- function(trees,lambda)
   {
       a <- c(a, trees[[i]]$risk[1] + lambda * count_leaves(trees[[i]]))
   }
-  trees[[which.min(a)]] %>% filter(name %in% c("root","leaf")) -> prun_tree
+  trees[[which.min(a)]] %>% filter(name %in% c("root","inner node","leaf")) -> prun_tree
   return(prun_tree)
 }
