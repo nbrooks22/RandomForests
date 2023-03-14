@@ -41,25 +41,25 @@
 #' val$values
 #' val$tree
 
-greedy_cart_regression <- function(data, num_leaf = NULL, depth = 0, num_split = 2, min_num = 1, m = 0){
+greedy_cart_regression <- function(data, num_leaf = 0, depth = 0, num_split = 2, min_num = 1, m = 0){
   # depth = Tiefe des Baumes die wir haben wollen
   # num_split = minimale Anzahl an Trainingsdaten die in einem Blatt sein sollen, damit noch gesplittet wird
   # bei num_split wird noch gesplittet, bei num_split - 1 nicht mehr
   # min_num = splitte nur, wenn die darauffolgenden leafs eine gewisse Größe haben
   # z.B nur splitten, wenn die daraus entstehenden leafs mind. 5 Elemente besitzen (min_num = 5)
 
-  if(is.null(num_leaf)) num_leaf <- length(data$y)
+  if(num_leaf == 0) num_leaf <- length(data$y)
   t <- num_leaf
   d <- nrow(data$x)
 
-
-  stopifnot("depth must be greater than or equal to 0" = depth >= 0)
-  stopifnot("num_split must be greater than or equal to 2" = num_split >= 2)
-  stopifnot("min_num must be greater than or equal to 1" = min_num >= 1)
-  stopifnot("num_leaf must be greater than or equal to 1" = num_leaf >= 1)
+  if (depth < 0) {warning("depth must be greater than or equal to 0. depth is set to 0"); depth <- 0}
+  if (num_split < 2) {warning("num_split must be greater than or equal to 2. num_split is set to 2"); num_split <- 2}
+  if (min_num < 1) {warning("min_num must be greater than or equal to 1. min_num is set to 1"); min_num <- 1}
+  if (num_leaf < 1) {warning("num_leaf must be greater than or equal to 1. num_leaf is set to 1"); num_leaf <- 1}
 
   row <- nrow(data$x)
-  stopifnot("m is too big" = m <= row)
+  if (m > row) {warning("m is too big. m is set to" , nrow(data$x)); m <- nrow(data$x)}
+
   if(m == 0) m <- row
   stopifnot("m must be greater than 0" = m > 0)
 
@@ -342,21 +342,19 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = 0, num_split =
 #' val <- greedy_cart_classification(data, num_split = 10)
 #' val$values
 #' val$tree
-greedy_cart_classification <- function(data, num_leaf = NULL, depth = 0, num_split = 2, min_num = 1, m = 0){
+greedy_cart_classification <- function(data, num_leaf = 0, depth = 0, num_split = 2, min_num = 1, m = 0){
 
-  if(is.null(num_leaf)) num_leaf <- length(data$y)
+  if(num_leaf == 0) num_leaf <- length(data$y)
   t <- num_leaf
   d <- nrow(data$x)
 
-
-
-  stopifnot("depth must be greater than or equal to 0" = depth >= 0)
-  stopifnot("num_split must be greater than or equal to 2" = num_split >= 2)
-  stopifnot("min_num must be greater than or equal to 1" = min_num >= 1)
-  stopifnot("num_leaf must be greater than or equal to 1" = num_leaf >= 1)
+  if (depth < 0) {warning("depth must be greater than or equal to 0. depth is set to 0"); depth <- 0}
+  if (num_split < 2) {warning("num_split must be greater than or equal to 2. num_split is set to 2"); num_split <- 2}
+  if (min_num < 1) {warning("min_num must be greater than or equal to 1. min_num is set to 1"); min_num <- 1}
+  if (num_leaf < 1) {warning("num_leaf must be greater than or equal to 1. num_leaf is set to 1"); num_leaf <- 1}
 
   row <- nrow(data$x)
-  stopifnot("m is too big" = m <= row)
+  if (m > row) warning("m is too big. m is set to" , nrow(data$x)); m <- nrow(data$x)
   if(m == 0) m <- row
   stopifnot("m must be greater than 0" = m > 0)
 
@@ -679,9 +677,9 @@ greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = 0, num_s
   stopifnot("x and y don't have compatible length" = as.integer(length(data1)/length(data2))*length(data2) == length(data1))
 
   # Überprüfung der Argumente
-  stopifnot("depth must be greater than or equal to 0" = depth >= 0)
-  stopifnot("num_split must be greater than or equal to 2" = num_split >= 2)
-  stopifnot("min_num must be greater than or equal to 1" = min_num >= 1)
+  if (depth < 0) {warning("depth must be greater than or equal to 0. depth is set to 0"); depth <- 0}
+  if (num_split < 2) {warning("num_split must be greater than or equal to 2. num_split is set to 2"); num_split <- 2}
+  if (min_num < 1) {warning("min_num must be greater than or equal to 1. min_num is set to 1"); min_num <- 1}
 
 
   mat <- matrix(data1, nrow = length(data1)/length(data2), byrow = TRUE)

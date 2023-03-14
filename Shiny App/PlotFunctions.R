@@ -16,6 +16,10 @@ printGreedyCartRegression <- function(data) {
 
   # Schätzer
   bayesRegelDaten <- data$tree %>% filter(name == "leaf")
+  
+  # Max-Min
+  minValue <- sort(data$values$x)[1] - 1
+  maxValue <- sort(data$values$x, decreasing = T)[1] + 1
 
   # Plot Schätzer
   for (row in 1:nrow(bayesRegelDaten)) {
@@ -27,12 +31,12 @@ printGreedyCartRegression <- function(data) {
 
     # Es existiert keine linke Trennlinie
     if (is.na(leftSideBorder)) {
-      segments(-1, bayesRegel, rightSideBorder, bayesRegel)
+      segments(minValue, bayesRegel, rightSideBorder, bayesRegel)
     }
 
     # Es existiert keine rechte Trennlinie
     if (is.na(rightSideBorder)) {
-      segments(leftSideBorder, bayesRegel, 2, bayesRegel)
+      segments(leftSideBorder, bayesRegel, maxValue, bayesRegel)
     }
 
     # Es existiert sowohl eine linke als auch eine rechte Trennlinie
@@ -91,14 +95,12 @@ plotTree <- function(data) {
   
   parentVector <- c()
   childVector <- c()
-  values <- c()
-
-  countNodes <- data$tree$node %>% last()
-  for (nodePosition in 1:countNodes) {
-    currentNode <- data$tree %>% filter(node == nodePosition)
+  
+  for (row in 1:nrow(data$tree)) {
+    currentNode <- data$tree[row, ]
     if (nrow(currentNode) > 0) {
-      leftChild <- data$tree %>% filter(node == nodePosition * 2)
-      rightChild <- data$tree %>% filter(node == nodePosition * 2 + 1)
+      leftChild <- data$tree %>% filter(node == currentNode$node * 2)
+      rightChild <- data$tree %>% filter(node == currentNode$node * 2 + 1)
 
       # Überprüfe, ob linkes Kind existiert
       if (nrow(leftChild) > 0) {
