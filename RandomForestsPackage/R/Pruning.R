@@ -121,7 +121,6 @@ pruning_regression <- function(trees,lambda)
   {
       a <- c(a, trees[[i]]$risk[1] + lambda * count_leaves(trees[[i]]))
   }
-
-  return(trees[[which.min(a)]])
+  trees[[which.min(a)]] %>% filter(name %in% c("root","leaf")) -> prun_tree
+  return(prun_tree)
 }
-
