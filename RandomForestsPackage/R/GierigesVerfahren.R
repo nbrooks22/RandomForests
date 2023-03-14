@@ -41,32 +41,43 @@
 #' val$values
 #' val$tree
 
-greedy_cart_regression <- function(data, num_leaf = 0, depth = 0, num_split = 2, min_num = 1, m = 0){
+greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_split = 2, min_num = 1, m = 0){
   # depth = Tiefe des Baumes die wir haben wollen
   # num_split = minimale Anzahl an Trainingsdaten die in einem Blatt sein sollen, damit noch gesplittet wird
   # bei num_split wird noch gesplittet, bei num_split - 1 nicht mehr
   # min_num = splitte nur, wenn die darauffolgenden leafs eine gewisse Größe haben
   # z.B nur splitten, wenn die daraus entstehenden leafs mind. 5 Elemente besitzen (min_num = 5)
 
-  if(num_leaf == 0) num_leaf <- length(data$y)
-  t <- num_leaf
+  if(is.null(num_leaf)) num_leaf <- length(data$y)
   d <- nrow(data$x)
 
-  if (depth < 0) {warning("depth must be greater than or equal to 0. depth is set to 0"); depth <- 0}
+  if (!is.null(depth)){
+    if(depth < 0) {warning("depth must be greater than or equal to 0. depth is set to the maximal depth"); depth <- -1}
+  }
   if (num_split < 2) {warning("num_split must be greater than or equal to 2. num_split is set to 2"); num_split <- 2}
   if (min_num < 1) {warning("min_num must be greater than or equal to 1. min_num is set to 1"); min_num <- 1}
-  if (num_leaf < 1) {warning("num_leaf must be greater than or equal to 1. num_leaf is set to 1"); num_leaf <- 1}
+  if (num_leaf < 1) {warning("num_leaf must be greater than or equal to 1. num_leaf is set to ", length(data$y)); num_leaf <- length(data$y)}
+  
+  if(is.null(depth)) depth <- -1
+  if(as.integer(num_leaf) != num_leaf) {warning("num_leaf is not an integer. The value is set to ", ceiling(num_leaf)); num_leaf <- ceiling(num_leaf)}
+  if(as.integer(depth) != depth) {warning("depth is not an integer. The value is set to ", ceiling(depth)); depth <- ceiling(depth)}
+  if(as.integer(num_split) != num_split) {warning("num_split is not an integer. The value is set to ", ceiling(num_split)); num_split <- ceiling(num_split)}
+  if(as.integer(min_num) != min_num) {warning("min_num is not an integer. The value is set to ", ceiling(min_num)); min_num <- ceiling(min_num)}
 
-  row <- nrow(data$x)
-  if (m > row) {warning("m is too big. m is set to" , nrow(data$x)); m <- nrow(data$x)}
+  
+  t <- num_leaf
 
-  if(m == 0) m <- row
-  stopifnot("m must be greater than 0" = m > 0)
+  row <- nrow(data$x)  
+  if(as.integer(m) != m) {warning("m is not an integer. m is set to ", ceiling(m)); m <- ceiling(m)}
+  if (m > row) {warning("m is too big. m is set to " , row); m <- row}
+  if(missing(m)) m <- row
+  if(m <= 0) {warning("m must be greater than 0. m is set to ", row); m <- row}
 
   greedyReg <- new.env()
 
 
   dat <- t(data$x)
+  colnames(dat) <- paste0('x', 1:ncol(dat))
   tb <- as_tibble(dat)
   if(row == 1){
     greedyReg$values <- bind_cols(as_tibble_col(as.vector(data$x), column_name = "x"), as_tibble_col(as.vector(data$y), column_name = "y"))
@@ -140,8 +151,8 @@ greedy_cart_regression <- function(data, num_leaf = 0, depth = 0, num_split = 2,
 
   # wenn depth nicht 0, zähle die Tiefe des Baumes
   # wenn 0: verändere dept_count nicht mehr
-  if(depth == 0){
-    depth_count <- -1
+  if(depth == -1){
+    depth_count <- -2
   } else{
     depth_count <- 0
   }
@@ -245,7 +256,7 @@ greedy_cart_regression <- function(data, num_leaf = 0, depth = 0, num_split = 2,
     tree %>%
       filter(name == "leaf") -> leaf_tree
     cond <- sapply(leaf_tree$A, length) # solange wie es noch mind. zwei Elemente gibt
-    if(depth != 0){
+    if(depth != -1){
       depth_count <- depth_count + 1
     }
 
@@ -342,27 +353,39 @@ greedy_cart_regression <- function(data, num_leaf = 0, depth = 0, num_split = 2,
 #' val <- greedy_cart_classification(data, num_split = 10)
 #' val$values
 #' val$tree
-greedy_cart_classification <- function(data, num_leaf = 0, depth = 0, num_split = 2, min_num = 1, m = 0){
+greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_split = 2, min_num = 1, m = 0){
 
-  if(num_leaf == 0) num_leaf <- length(data$y)
-  t <- num_leaf
+  if(is.null(num_leaf)) num_leaf <- length(data$y)
   d <- nrow(data$x)
 
-  if (depth < 0) {warning("depth must be greater than or equal to 0. depth is set to 0"); depth <- 0}
+  if (!is.null(depth)){
+    if(depth < 0) {warning("depth must be greater than or equal to 0. depth is set to the maximal depth"); depth <- -1}
+  }  
   if (num_split < 2) {warning("num_split must be greater than or equal to 2. num_split is set to 2"); num_split <- 2}
   if (min_num < 1) {warning("min_num must be greater than or equal to 1. min_num is set to 1"); min_num <- 1}
-  if (num_leaf < 1) {warning("num_leaf must be greater than or equal to 1. num_leaf is set to 1"); num_leaf <- 1}
+  if (num_leaf < 1) {warning("num_leaf must be greater than or equal to 1. num_leaf is set to ", length(data$y)); num_leaf <- length(data$y)}
+
+  if(is.null(depth)) depth <- -1
+  if(as.integer(num_leaf) != num_leaf) {warning("num_leaf is not an integer. The value is set to ", ceiling(num_leaf)); num_leaf <- ceiling(num_leaf)}
+  if(as.integer(depth) != depth) {warning("depth is not an integer. The value is set to ", ceiling(depth)); depth <- ceiling(depth)}
+  if(as.integer(num_split) != num_split) {warning("num_split is not an integer. The value is set to ", ceiling(num_split)); num_split <- ceiling(num_split)}
+  if(as.integer(min_num) != min_num) {warning("min_num is not an integer. The value is set to ", ceiling(min_num)); min_num <- ceiling(min_num)}
+
+  t <- num_leaf
 
   row <- nrow(data$x)
-  if (m > row) warning("m is too big. m is set to" , nrow(data$x)); m <- nrow(data$x)
-  if(m == 0) m <- row
-  stopifnot("m must be greater than 0" = m > 0)
+  if(as.integer(m) != m) {warning("m is not an integer. m is set to ", ceiling(m)); m <- ceiling(m)}
+  if (m > row) {warning("m is too big. m is set to " , row); m <- row}
+  if(missing(m)) m <- row
+  if(m <= 0) {warning("m must be greater than 0. m is set to ", row); m <- row}
+
 
   greedyCla <- new.env()
 
   greedyCla$dim <- row
 
   dat <- t(data$x)
+  colnames(dat) <- paste0('x', 1:ncol(dat))
   tb <- as_tibble(dat)
   if(row == 2){
     greedyCla$values <- bind_cols(as_tibble_col(as.vector(data$x[1, ]), column_name = "x"),
@@ -450,8 +473,8 @@ greedy_cart_classification <- function(data, num_leaf = 0, depth = 0, num_split 
 
 
   cond <- sapply(tree$A, length) # gibt an, wie viele Elemente jeweils in A(v) sind
-  if(depth == 0){
-    depth_count <- -1
+  if(depth == -1){
+    depth_count <- -2
   } else{
     depth_count <- 0
   }
@@ -553,7 +576,7 @@ greedy_cart_classification <- function(data, num_leaf = 0, depth = 0, num_split 
     tree %>%
       filter(name == "leaf") -> leaf_tree
     cond <- sapply(leaf_tree$A, length) # solange wie es noch mind. zwei Elemente gibt
-    if(depth != 0){
+    if(depth != -1){
       depth_count <- depth_count + 1
     }
 
@@ -653,7 +676,7 @@ greedy_cart_classification <- function(data, num_leaf = 0, depth = 0, num_split 
 #' val$tree
 
 
-greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = 0, num_split = 2, min_num = 1, m = 0){
+greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = NULL, num_split = 2, min_num = 1, m = 0){
   # Daten umformatieren
   # hier kann man auch schauen, ob die Daten
   # in der richtigen Struktur sind
@@ -676,15 +699,13 @@ greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = 0, num_s
   # x ist ein vielfaches der Länge von y
   stopifnot("x and y don't have compatible length" = as.integer(length(data1)/length(data2))*length(data2) == length(data1))
 
-  # Überprüfung der Argumente
-  if (depth < 0) {warning("depth must be greater than or equal to 0. depth is set to 0"); depth <- 0}
-  if (num_split < 2) {warning("num_split must be greater than or equal to 2. num_split is set to 2"); num_split <- 2}
-  if (min_num < 1) {warning("min_num must be greater than or equal to 1. min_num is set to 1"); min_num <- 1}
-
+  # Überprüfung der Argumente passiert in den Unterfunktionen
 
   mat <- matrix(data1, nrow = length(data1)/length(data2), byrow = TRUE)
   dat <- list(x = mat, y = data2)
-
+  row <- nrow(mat)
+  if(missing(m)) m <- row
+  
   # wenn kein Typ angegeben wurde -> versuche Typ zu erraten
   if(is.null(type)){
     y_int <- as.integer(data2)
