@@ -4,7 +4,16 @@
 \alias{random_forest_regression}
 \title{RANDOM FOREST ALGORITHM (Regression)}
 \usage{
-random_forest_regression(data, m, t)
+random_forest_regression(
+  data,
+  B,
+  A,
+  m,
+  num_leaf = NULL,
+  depth = 0,
+  num_split = 2,
+  min_num = 1
+)
 }
 \arguments{
 \item{data}{Tibble that contains Regression Data}

@@ -4,7 +4,7 @@
 #' Greedy algorithm for regression data
 #'
 #' @param data a named list that contains regression data\cr the x values have the name x and are in
-#' the form of a matrix where the rownumber gives the dimension of the data\cr the y
+#' the form of a matrix where the row number gives the dimension of the data\cr the y
 #' values have the name y and are in the form of a vector
 #' @param depth Condition to end: the tree hast depth `depth`\cr must be greater than 0
 #' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
@@ -52,20 +52,20 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = 0, num_split =
   t <- num_leaf
   d <- nrow(data$x)
 
-  
+
   stopifnot("depth must be greater than or equal to 0" = depth >= 0)
   stopifnot("num_split must be greater than or equal to 2" = num_split >= 2)
   stopifnot("min_num must be greater than or equal to 1" = min_num >= 1)
   stopifnot("num_leaf must be greater than or equal to 1" = num_leaf >= 1)
-  
+
   row <- nrow(data$x)
   stopifnot("m is too big" = m <= row)
-  if(m == 0) m <- row 
+  if(m == 0) m <- row
   stopifnot("m must be greater than 0" = m > 0)
-  
+
   greedyReg <- new.env()
-  
-  
+
+
   dat <- t(data$x)
   tb <- as_tibble(dat)
   if(row == 1){
@@ -73,7 +73,7 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = 0, num_split =
   } else{
     greedyReg$values <- bind_cols(tb, as_tibble_col(as.vector(data$y), column_name = "y"))
   }
-  
+
   greedyReg$dim <- row
   # schreibe Beobachtungen von X in Liste (Elemente sind die Spalten)
   X <- lapply(seq_len(ncol(data$x)), function(i) data$x[,i])
@@ -191,9 +191,9 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = 0, num_split =
       # objective = minimaler Wert
       # minimum = argmin
       # minimum nicht in den ganzen Daten von x (data$x) suchen, nur in A(v)
-      
+
       S <- sample(1:d,m)
-      S <- sort(S)                
+      S <- sort(S)
       for(k in S){
         j <- k
         # nehme von jedem Listenelement die j-te Komponente
@@ -216,14 +216,14 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = 0, num_split =
 
       c_1 <- c1(opt[1],opt[2],v)
       c_2 <- c2(opt[1],opt[2],v)
-      
+
       # füge die neuen Zeilen (Blätter) in tree ein
       # nur, wenn # A1 und # A2 >= min_num sind
       A_1 <- A1(opt[1],opt[2],v)
       A_2 <- A2(opt[1],opt[2],v)
-      num_leafs <- length(find_leaf1(tree))                
+      num_leafs <- length(find_leaf1(tree))
       # Füge ersten Knoten an, und schaue ob wir jetzt t Blätter haben
-                
+
       if(length(A_1) >= min_num & length(A_2) >= min_num){
         if(num_leafs == t){
           break
@@ -234,11 +234,11 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = 0, num_split =
           tree[tree$node == 2*v,]$A[[1]] <- A1(opt[1],opt[2],v)
           tree[tree$node == 2*v + 1,]$A[[1]] <- A2(opt[1],opt[2],v)
           # benenne leafs in leaf um (im Tibble)
-          tree %>% 
+          tree %>%
             mutate(name = ifelse(node == v, "inner node", ifelse(node == 2*v, "leaf", ifelse(node == 2*v + 1, "leaf", name)))) -> tree
-          
+
         }
-        
+
       }
     }
 
@@ -343,31 +343,31 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = 0, num_split =
 #' val$values
 #' val$tree
 greedy_cart_classification <- function(data, num_leaf = NULL, depth = 0, num_split = 2, min_num = 1, m = 0){
-  
+
   if(is.null(num_leaf)) num_leaf <- length(data$y)
   t <- num_leaf
   d <- nrow(data$x)
 
-  
-  
+
+
   stopifnot("depth must be greater than or equal to 0" = depth >= 0)
   stopifnot("num_split must be greater than or equal to 2" = num_split >= 2)
   stopifnot("min_num must be greater than or equal to 1" = min_num >= 1)
   stopifnot("num_leaf must be greater than or equal to 1" = num_leaf >= 1)
-  
+
   row <- nrow(data$x)
   stopifnot("m is too big" = m <= row)
-  if(m == 0) m <- row 
+  if(m == 0) m <- row
   stopifnot("m must be greater than 0" = m > 0)
-  
+
   greedyCla <- new.env()
-  
+
   greedyCla$dim <- row
- 
+
   dat <- t(data$x)
   tb <- as_tibble(dat)
   if(row == 2){
-    greedyCla$values <- bind_cols(as_tibble_col(as.vector(data$x[1, ]), column_name = "x"), 
+    greedyCla$values <- bind_cols(as_tibble_col(as.vector(data$x[1, ]), column_name = "x"),
                                   as_tibble_col(as.vector(data$x[2, ]), column_name = "y"))
     greedyCla$values <- bind_cols(greedyCla$values, as_tibble_col(data$y, column_name = "classes"))
   } else{
@@ -494,7 +494,7 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = 0, num_spl
       # minimum nicht in den ganzen Daten von x (data$x) suchen, nur in A(v)
       S <- sample(1:d,m)
       S <- sort(S)
-      
+
       for(k in S){
         j <- k
         # nehme von jedem Listenelement die j-te Komponente
@@ -545,9 +545,9 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = 0, num_spl
           tree[tree$node == 2*v,]$A[[1]] <- A1(opt[1],opt[2],v)
           tree[tree$node == 2*v + 1,]$A[[1]] <- A2(opt[1],opt[2],v)
           # benenne leafs in leaf um (im Tibble)
-          tree %>% 
+          tree %>%
             mutate(name = ifelse(node == v, "inner node", ifelse(node == 2*v, "leaf", ifelse(node == 2*v + 1, "leaf", name)))) -> tree
-          
+
         }
       }
     }
@@ -653,8 +653,8 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = 0, num_spl
 #' val <- greedy_cart(x = c(x1,x2), y = y, data = tbl, type = "class", depth = 3)
 #' val$values
 #' val$tree
-                      
-                      
+
+
 greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = 0, num_split = 2, min_num = 1, m = 0){
   # Daten umformatieren
   # hier kann man auch schauen, ob die Daten
@@ -673,7 +673,7 @@ greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = 0, num_s
   stopifnot("y must be numeric" = is.numeric(data2))
   # y muss eindimensional sein
   stopifnot("y must be one-dimensional" = NCOL(data2) == 1)
-  
+
   # x und y sollen richtige Länge haben
   # x ist ein vielfaches der Länge von y
   stopifnot("x and y don't have compatible length" = as.integer(length(data1)/length(data2))*length(data2) == length(data1))
@@ -683,10 +683,10 @@ greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = 0, num_s
   stopifnot("num_split must be greater than or equal to 2" = num_split >= 2)
   stopifnot("min_num must be greater than or equal to 1" = min_num >= 1)
 
-  
+
   mat <- matrix(data1, nrow = length(data1)/length(data2), byrow = TRUE)
   dat <- list(x = mat, y = data2)
-  
+
   # wenn kein Typ angegeben wurde -> versuche Typ zu erraten
   if(is.null(type)){
     y_int <- as.integer(data2)
@@ -700,7 +700,7 @@ greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = 0, num_s
     }
   }
 
-  
+
   if(type == "reg"){
     return(greedy_cart_regression(dat, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m))
   } else if(type == "class"){

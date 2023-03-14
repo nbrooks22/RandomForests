@@ -2,22 +2,26 @@
 % Please edit documentation in R/Bagging.R
 \name{bagging_classification}
 \alias{bagging_classification}
-\title{RANDOM FOREST BAGGING ALGORITHM (Classification)}
+\title{Bagging Algorithm (Classification)}
 \usage{
 bagging_classification(data, b, pred_val)
 }
 \arguments{
-\item{data}{Tibble that contains Regression Data}
+\item{data}{a named list that contains classification data\cr the x values have the name x and are in
+the form of a matrix \cr where the row number gives the dimension of the data\cr the y
+values have the name y and are in the form of a vector}
 
-\item{m}{Number of Samples that should be aquired}
+\item{b}{Number of Bags to create}
 
-\item{x}{OPTIONAL: If wanting to predict a Value}
+\item{pred_val}{OPTIONAL: If wanting to predict a Value, a vector of length \cr equal to the number of dimensions in our data set}
 }
 \value{
-tree in format: Tibble (BFS)
+A named list with the elements \code{Bagged_Trees} and \code{Prediction}.\cr
+\code{Bagged_Trees} is an unnamed list with a number of tree \cr elements (see ?greedy_cart_regression) equal to the input value \code{b}\cr
+\code{Prediction} is the predicted class resulting from the \code{pred_val} data point.\cr If no \code{pred_val} was provided, this value is NULL
 }
 \description{
-Condition to End: The Tree has t leaves - 6.52
+Bagging Algorithm for Classification data.
 }
 \examples{
 bagging_classification(create_Sample_data_class(1), 4, c(0.1,0.5, 0.6))

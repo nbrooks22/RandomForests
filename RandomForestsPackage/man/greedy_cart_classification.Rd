@@ -4,18 +4,31 @@
 \alias{greedy_cart_classification}
 \title{Greedy Algorithm (Classification)}
 \usage{
-greedy_cart_classification(data, depth = 0, num_split = 2, min_num = 1)
+greedy_cart_classification(
+  data,
+  num_leaf = NULL,
+  depth = 0,
+  num_split = 2,
+  min_num = 1,
+  m = 0
+)
 }
 \arguments{
 \item{data}{a named list that contains classification data\cr the x values have the name x and are in
 the form of a matrix where the rownumber gives the dimension of the data\cr the y
 values have the name y and are in the form of a vector}
 
-\item{depth}{desired depth of the tree}
+\item{num_leaf}{Condition to end: the tree has \code{num_leaf} leaves \cr must be greater than or equal to 1}
 
-\item{num_split}{split only nodes which contain at least num_split elements}
+\item{depth}{Condition to end: the tree hast depth \code{depth}\cr must be greater than 0}
 
-\item{min_num}{only split a node, if both child nodes have at least min_num elements}
+\item{num_split}{split only nodes which contain at least \code{num_split} elements \cr must be greater than or equal to 2}
+
+\item{min_num}{only split a node, if both child nodes have at least \code{min_num} elements \cr must be greater than or equal to 1}
+
+\item{m}{parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration \cr
+must be smaller than the dimension of the data (if dimension is \eqn{>=} 2) or must be equal to the dimension of the data (if dimension is \eqn{=} 1) \cr
+the default value is the dimension of the data}
 }
 \value{
 An environment with the elements \code{dim}, \code{values} and \code{tree}.\cr
