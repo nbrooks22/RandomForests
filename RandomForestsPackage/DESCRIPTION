@@ -15,8 +15,7 @@ Description:    For regression and classification problems this package allows t
                 for the creation of CARTs via the greedy method and optimizing them through cost-complexity
                 pruning are available. Finally the bagging and the random forest algorithm are 
                 implemented. 
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
