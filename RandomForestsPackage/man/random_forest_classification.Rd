@@ -2,32 +2,68 @@
 % Please edit documentation in R/RForests.R
 \name{random_forest_classification}
 \alias{random_forest_classification}
-\title{RANDOM FOREST ALGORITHM (Classification)}
+\title{Random Forest Algorithm (Classification)}
 \usage{
 random_forest_classification(
   data,
   B,
-  A,
-  m,
+  A = NULL,
+  m = 0,
   num_leaf = NULL,
-  depth = 0,
+  depth = NULL,
   num_split = 2,
   min_num = 1
 )
 }
 \arguments{
-\item{data}{Tibble that contains Regression Data}
+\item{data}{a named list that contains classification data\cr the x values have the name x and are in
+the form of a matrix where the row number gives the dimension of the data\cr the y
+values have the name y and are in the form of a vector}
 
-\item{m}{Number of Samples that should be aquired}
+\item{B}{number of Bags to create}
 
-\item{t}{Condition to End: The Tree has t leaves}
+\item{A}{sample size we want to use
+\cr must be greater than 0 and less than or equal to the number of observations
+\cr the default value is the size of the data (so all observations are used)}
+
+\item{m}{positive number of coordinates which we want to use in each iteration
+\cr the default value is the dimension of the data}
+
+\item{num_leaf}{Condition to end: the tree has \code{num_leaf} leaves \cr must be greater than or equal to 1
+\cr the default value is the maximal achievable number of leaves (the number of data points)}
+
+\item{depth}{Condition to end: the tree has depth \code{depth}\cr must be greater than or equal to 0
+\cr the default value is the maximal achievable depth}
+
+\item{num_split}{split only nodes which contain at least \code{num_split} elements \cr must be greater than or equal to 2}
+
+\item{min_num}{only split a node, if both child nodes have at least \code{min_num} elements \cr must be greater than or equal to 1}
 }
 \value{
-tree in format: Tibble (BFS)
+a list of \code{B} trees (description for a tree see ?greedy_cart)
 }
 \description{
-Condition to End: The Tree has t leaves - 6.52
+Random Forest Algorithm for classification data
 }
 \examples{
-random_forest_classification(create_random_sample_data_class(10, 100), 30, 40)
+X1 <- runif(50,0,1)
+X2 <- runif(50,0,1)
+e <- rnorm(50,0,0.2)
+kappa <- function(x,y) y - 0.5 - 0.3*sin(2*pi*x)
+f <- function(x,y,e){
+  Y <- c()
+  for(i in seq_along(x)){
+    if(kappa(X1[i],X2[i]) - e[i] <= 0){
+      Y[i] <- 1
+    } else{
+      Y[i] <- 2
+    }
+  }
+  Y
+}
+data <- list(x = matrix(c(X1,X2), nrow = 2, byrow = TRUE), y = f(X1,X2,e))
+random_forest_classification(data, B = 5, A = 25, m = 1, depth = 4)
+
+
+
 }

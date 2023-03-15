@@ -2,32 +2,80 @@
 % Please edit documentation in R/RForests.R
 \name{random_forest}
 \alias{random_forest}
-\title{RANDOM FOREST ALGORITHM}
+\title{Random Forest Algorithm}
 \usage{
 random_forest(
   x,
   y,
   data,
-  B,
-  A,
-  m,
   type = NULL,
+  B,
+  A = NULL,
+  m = 0,
   num_leaf = NULL,
-  depth = 0,
+  depth = NULL,
   num_split = 2,
   min_num = 1
 )
 }
 \arguments{
-\item{data}{Tibble that contains Regression Data}
+\item{x}{column/list name(s) of the x value(s)}
 
-\item{m}{Number of Samples that should be aquired}
+\item{y}{column/list name of the y value}
 
-\item{t}{Condition to End: The Tree has t leaves}
+\item{data}{tibble or named list with data}
+
+\item{type}{"reg" for regression tree\cr "class" for classification tree
+\cr if \code{type} is missing the function tries to "guess" the type}
+
+\item{B}{number of Bags to create}
+
+\item{A}{sample size we want to use
+\cr must be greater than 0 and less than or equal to the number of observations
+\cr the default value is the size of the data (so all observations are used)}
+
+\item{m}{positive number of coordinates which we want to use in each iteration
+\cr the default value is the dimension of the data}
+
+\item{num_leaf}{Condition to end: the tree has \code{num_leaf} leaves \cr must be greater than or equal to 1
+\cr the default value is the maximal achievable number of leaves (the number of data points)}
+
+\item{depth}{Condition to end: the tree has depth \code{depth}\cr must be greater than or equal to 0
+\cr the default value is the maximal achievable depth}
+
+\item{num_split}{split only nodes which contain at least \code{num_split} elements \cr must be greater than or equal to 2}
+
+\item{min_num}{only split a node, if both child nodes have at least \code{min_num} elements \cr must be greater than or equal to 1}
 }
 \value{
-tree in format: Tibble (BFS)
+a list of \code{B} trees (description for a tree see ?greedy_cart)
 }
 \description{
-Condition to End: The Tree has t leaves - 6.52
+Random Forest Algorithm for either regression or classification data
+}
+\examples{
+X1 <- runif(50,0,1)
+X2 <- runif(50,0,1)
+X3 <- runif(50,0,1)
+Y <- X1 + X2 + X3
+data_reg <- tibble(a = X1, b = X2, c = X3, y = Y)
+random_forest_regression(x = c(a,b,c), y = y, data = data_reg, type = "reg", B = 5, A = 25, m = 2, num_leaf = 10)
+
+X1 <- runif(50,0,1)
+X2 <- runif(50,0,1)
+e <- rnorm(50,0,0.2)
+kappa <- function(x,y) y - 0.5 - 0.3*sin(2*pi*x)
+f <- function(x,y,e){
+  Y <- c()
+  for(i in seq_along(x)){
+    if(kappa(X1[i],X2[i]) - e[i] <= 0){
+      Y[i] <- 1
+    } else{
+      Y[i] <- 2
+    }
+  }
+  Y
+}
+data_class <- list(x1 = X1, x2 = X2, y = f(X1,X2,e))
+random_forest_classification(x = c(x1, x2), y = y, data = data_class, type = "class", B = 5, A = 25, m = 1, depth = 4)
 }

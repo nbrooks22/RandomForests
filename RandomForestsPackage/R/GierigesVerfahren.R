@@ -6,28 +6,29 @@
 #' @param data a named list that contains regression data\cr the x values have the name x and are in
 #' the form of a matrix where the row number gives the dimension of the data\cr the y
 #' values have the name y and are in the form of a vector
-#' @param depth Condition to end: the tree hast depth `depth`\cr must be greater than 0
+#' @param depth Condition to end: the tree has depth `depth`\cr must be greater than or equal to 0
+#' \cr the default value is the maximal achievable depth
 #' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
 #' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
 #' @param num_leaf Condition to end: the tree has `num_leaf` leaves \cr must be greater than or equal to 1
-#' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration \cr
-#' must be smaller than the dimension of the data (if dimension is \eqn{>=} 2) or must be equal to the dimension of the data (if dimension is \eqn{=} 1) \cr
-#' the default value is the dimension of the data
+#' \cr the default value is the maximal achievable number of leaves (the number of data points)
+#' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration
+#' \cr the default value is the dimension of the data
 #'
 #' @return An environment with the elements `dim`, `values` and `tree`.\cr
-#' `dim` gives the dimension of the data. \cr
-#' `values` is the regression data in a tibble. \cr
-#' `tree` is the tree in the form of a tibble. It has the following columns \cr
+#' `dim`: the dimension of the data. \cr
+#' `values`: data in a tibble. \cr
+#' `tree`: decision tree in the form of a tibble. It has the following columns \cr
 #' \itemize{
-#'    \item node: node n has the child nodes 2n and 2n + 1
-#'    \item name: type of the node (root, inner node, leaf)
-#'    \item split_index: at which index we split the data
-#'    \item split_point: where we split the data. If node 2n has the split point s
+#'    \item `node`: node n has the child nodes 2n and 2n + 1
+#'    \item `name`: type of the node (root, inner node, leaf)
+#'    \item `split_index`: at which index we split the data
+#'    \item `split_point`: where we split the data. If node 2n has the split point s
 #'    then all data in this node is less than s. Analog if the node 2n + 1 has the split point s
 #'    then all data in this node is greater than or equal to s.
-#'    \item y: only for leafs; the approximate value for the data in a leaf
-#'    \item A: elements of the data in this node
-#'    \item c_value: the approximate value for the data in a node
+#'    \item `y`: y values of data contained in this node
+#'    \item `A`: x values of data contained in this node
+#'    \item `c_value`: the approximate value for the data elements in a node
 #' }
 #'
 #' @export
@@ -57,17 +58,17 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_spli
   if (num_split < 2) {warning("num_split must be greater than or equal to 2. num_split is set to 2"); num_split <- 2}
   if (min_num < 1) {warning("min_num must be greater than or equal to 1. min_num is set to 1"); min_num <- 1}
   if (num_leaf < 1) {warning("num_leaf must be greater than or equal to 1. num_leaf is set to ", length(data$y)); num_leaf <- length(data$y)}
-  
+
   if(is.null(depth)) depth <- -1
   if(as.integer(num_leaf) != num_leaf) {warning("num_leaf is not an integer. The value is set to ", ceiling(num_leaf)); num_leaf <- ceiling(num_leaf)}
   if(as.integer(depth) != depth) {warning("depth is not an integer. The value is set to ", ceiling(depth)); depth <- ceiling(depth)}
   if(as.integer(num_split) != num_split) {warning("num_split is not an integer. The value is set to ", ceiling(num_split)); num_split <- ceiling(num_split)}
   if(as.integer(min_num) != min_num) {warning("min_num is not an integer. The value is set to ", ceiling(min_num)); min_num <- ceiling(min_num)}
 
-  
+
   t <- num_leaf
 
-  row <- nrow(data$x)  
+  row <- nrow(data$x)
   if(as.integer(m) != m) {warning("m is not an integer. m is set to ", ceiling(m)); m <- ceiling(m)}
   if (m > row) {warning("m is too big. m is set to " , row); m <- row}
   if(missing(m)) m <- row
@@ -152,10 +153,10 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_spli
          #if(X[[i]] %in% A1(j,s)) Y <- Y + data$y[i]
         Y[[length(Y) + 1]] <- data$y[i]
        }
-       
+
      }
      Y
-   }                  
+   }
 
   # mache das hier so lange bis jedes Blatt nur noch einen Datenpunkt hat
   # D.h alle A(v) sind entweder leer oder haben nur ein Element
@@ -301,29 +302,29 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_spli
 #' @param data a named list that contains classification data\cr the x values have the name x and are in
 #' the form of a matrix where the rownumber gives the dimension of the data\cr the y
 #' values have the name y and are in the form of a vector
-#' @param depth Condition to end: the tree hast depth `depth`\cr must be greater than 0
+#' @param depth Condition to end: the tree has depth `depth`\cr must be greater than or equal to 0
+#' \cr the default value is the maximal achievable depth
 #' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
 #' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
 #' @param num_leaf Condition to end: the tree has `num_leaf` leaves \cr must be greater than or equal to 1
-#' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration \cr
-#' must be smaller than the dimension of the data (if dimension is \eqn{>=} 2) or must be equal to the dimension of the data (if dimension is \eqn{=} 1) \cr
-#' the default value is the dimension of the data
-#'
+#' \cr the default value is the maximal achievable number of leaves (the number of data points)
+#' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration
+#' \cr the default value is the dimension of the data
 #'
 #' @return An environment with the elements `dim`, `values` and `tree`.\cr
-#' `dim` gives the dimension of the data. \cr
-#' `values` gives back the classification data in a tibble. \cr
-#' `tree` is the tree in the form of a tibble. It has the following columns \cr
+#' `dim`: the dimension of the data. \cr
+#' `values`: data in a tibble. \cr
+#' `tree`: decision tree in the form of a tibble. It has the following columns \cr
 #' \itemize{
-#'    \item node: node n has the child nodes 2n and 2n + 1
-#'    \item name: type of the node (root, inner node, leaf)
-#'    \item split_index: at which index we split the data
-#'    \item split_point: where we split the data. If node 2n has the split point s
+#'    \item `node`: node n has the child nodes 2n and 2n + 1
+#'    \item `name`: type of the node (root, inner node, leaf)
+#'    \item `split_index`: at which index we split the data
+#'    \item `split_point`: where we split the data. If node 2n has the split point s
 #'    then all data in this node is less than s. Analog if the node 2n + 1 has the split point s
 #'    then all data in this node is greater than or equal to s.
-#'    \item y: only for leafs; the approximate value for the data in a leaf
-#'    \item A: elements of the data in this node
-#'    \item c_value: the approximate value for the data in a node
+#'    \item `y`: y values of data contained in this node
+#'    \item `A`: x values of data contained in this node
+#'    \item `c_value`: the approximate value for the data elements in a node
 #' }
 #'
 #' @export
@@ -355,7 +356,7 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
 
   if (!is.null(depth)){
     if(depth < 0) {warning("depth must be greater than or equal to 0. depth is set to the maximal depth"); depth <- -1}
-  }  
+  }
   if (num_split < 2) {warning("num_split must be greater than or equal to 2. num_split is set to 2"); num_split <- 2}
   if (min_num < 1) {warning("min_num must be greater than or equal to 1. min_num is set to 1"); min_num <- 1}
   if (num_leaf < 1) {warning("num_leaf must be greater than or equal to 1. num_leaf is set to ", length(data$y)); num_leaf <- length(data$y)}
@@ -616,29 +617,30 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
 #' @param y column/list name of the y value
 #' @param data tibble or named list with data
 #' @param type "reg" for regression tree\cr "class" for classification tree
-#' @param depth Condition to end: the tree hast depth `depth`\cr must be greater than 0
+#' \cr if `type` is missing the function tries to "guess" the type
+#' @param depth Condition to end: the tree has depth `depth`\cr must be greater than or equal to 0
+#' \cr the default value is the maximal achievable depth
 #' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
 #' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
 #' @param num_leaf Condition to end: the tree has `num_leaf` leaves \cr must be greater than or equal to 1
-#' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration \cr
-#' must be smaller than the dimension of the data (if dimension is \eqn{>=} 2) or must be equal to the dimension of the data (if dimension is \eqn{=} 1) \cr
-#' the default value is the dimension of the data
-#'
+#' \cr the default value is the maximal achievable number of leaves (the number of data points)
+#' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration
+#' \cr the default value is the dimension of the data
 #'
 #' @return An environment with the elements `dim`, `values` and `tree`.\cr
-#' `dim` gives the dimension of the data. \cr
-#' `values` gives back the data in a tibble. \cr
-#' `tree` is the tree in the form of a tibble. It has the following columns \cr
+#' `dim`: the dimension of the data. \cr
+#' `values`: data in a tibble. \cr
+#' `tree`: decision tree in the form of a tibble. It has the following columns \cr
 #' \itemize{
-#'    \item node: node n has the child nodes 2n and 2n + 1
-#'    \item name: type of the node (root, inner node, leaf)
-#'    \item split_index: at which index we split the data
-#'    \item split_point: where we split the data. If node 2n has the split point s
+#'    \item `node`: node n has the child nodes 2n and 2n + 1
+#'    \item `name`: type of the node (root, inner node, leaf)
+#'    \item `split_index`: at which index we split the data
+#'    \item `split_point`: where we split the data. If node 2n has the split point s
 #'    then all data in this node is less than s. Analog if the node 2n + 1 has the split point s
 #'    then all data in this node is greater than or equal to s.
-#'    \item y: only for leafs; the approximate value for the data in a leaf
-#'    \item A: elements of the data in this node
-#'    \item c_value: the approximate value for the data in a node
+#'    \item `y`: y values of data contained in this node
+#'    \item `A`: x values of data contained in this node
+#'    \item `c_value`: the approximate value for the data elements in a node
 #' }
 #'
 #' @export
@@ -701,7 +703,7 @@ greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = NULL, nu
   dat <- list(x = mat, y = data2)
   row <- nrow(mat)
   if(missing(m)) m <- row
-  
+
   # wenn kein Typ angegeben wurde -> versuche Typ zu erraten
   if(is.null(type)){
     y_int <- as.integer(data2)

@@ -6,8 +6,8 @@
 \usage{
 greedy_cart_classification(
   data,
-  num_leaf = 0,
-  depth = 0,
+  num_leaf = NULL,
+  depth = NULL,
   num_split = 2,
   min_num = 1,
   m = 0
@@ -18,33 +18,34 @@ greedy_cart_classification(
 the form of a matrix where the rownumber gives the dimension of the data\cr the y
 values have the name y and are in the form of a vector}
 
-\item{num_leaf}{Condition to end: the tree has \code{num_leaf} leaves \cr must be greater than or equal to 1}
+\item{num_leaf}{Condition to end: the tree has \code{num_leaf} leaves \cr must be greater than or equal to 1
+\cr the default value is the maximal achievable number of leaves (the number of data points)}
 
-\item{depth}{Condition to end: the tree hast depth \code{depth}\cr must be greater than 0}
+\item{depth}{Condition to end: the tree has depth \code{depth}\cr must be greater than or equal to 0
+\cr the default value is the maximal achievable depth}
 
 \item{num_split}{split only nodes which contain at least \code{num_split} elements \cr must be greater than or equal to 2}
 
 \item{min_num}{only split a node, if both child nodes have at least \code{min_num} elements \cr must be greater than or equal to 1}
 
-\item{m}{parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration \cr
-must be smaller than the dimension of the data (if dimension is \eqn{>=} 2) or must be equal to the dimension of the data (if dimension is \eqn{=} 1) \cr
-the default value is the dimension of the data}
+\item{m}{parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration
+\cr the default value is the dimension of the data}
 }
 \value{
 An environment with the elements \code{dim}, \code{values} and \code{tree}.\cr
-\code{dim} gives the dimension of the data. \cr
-\code{values} gives back the classification data in a tibble. \cr
-\code{tree} is the tree in the form of a tibble. It has the following columns \cr
+\code{dim}: the dimension of the data. \cr
+\code{values}: data in a tibble. \cr
+\code{tree}: decision tree in the form of a tibble. It has the following columns \cr
 \itemize{
-\item node: node n has the child nodes 2n and 2n + 1
-\item name: type of the node (root, inner node, leaf)
-\item split_index: at which index we split the data
-\item split_point: where we split the data. If node 2n has the split point s
+\item \code{node}: node n has the child nodes 2n and 2n + 1
+\item \code{name}: type of the node (root, inner node, leaf)
+\item \code{split_index}: at which index we split the data
+\item \code{split_point}: where we split the data. If node 2n has the split point s
 then all data in this node is less than s. Analog if the node 2n + 1 has the split point s
 then all data in this node is greater than or equal to s.
-\item y: only for leafs; the approximate value for the data in a leaf
-\item A: elements of the data in this node
-\item c_value: the approximate value for the data in a node
+\item \code{y}: y values of data contained in this node
+\item \code{A}: x values of data contained in this node
+\item \code{c_value}: the approximate value for the data elements in a node
 }
 }
 \description{
