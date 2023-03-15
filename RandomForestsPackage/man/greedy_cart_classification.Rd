@@ -6,7 +6,7 @@
 \usage{
 greedy_cart_classification(
   data,
-  num_leaf = NULL,
+  num_leaf = 0,
   depth = 0,
   num_split = 2,
   min_num = 1,

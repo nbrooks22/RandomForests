@@ -41,9 +41,9 @@ create_random_sample_data_reg_dim <- function(n, m, dim){
 #CREATE SAMPLE DATA FOR CLASSIFICATION (As Matrix) - function(SEED n (NOT ADDED CURRENTLY: #VALUES m))
 create_Sample_data_class <- function(n){
   set.seed(n)
-  X1 <- runif(100,0,1)
-  X2 <- runif(100,0,1)
-  e <- rnorm(100,0,0.2)
+  X1 <- runif(20,0,1)
+  X2 <- runif(20,0,1)
+  e <- rnorm(20,0,0.2)
   kappa <- function(x,y) y - 0.5 - 0.3*sin(2*pi*x)
   f <- function(x,y,e){
     Y <- c()
@@ -67,10 +67,21 @@ find_leaf1 <- function(tree){
   return(leafs$node)
 }
 
-#RunDataThroughTree
-make_prediction <- function(tree, x){
+#RunDataThroughList of Trees
+make_prediction <- function(tree_list, x_list, type = NULL){
+  if(class(tree_list) != class(list())){
+    stop("The Tree you are making a prediction for must be in a List!")
+  }
+  if(any(class(x_list) != class(matrix()))){
+    stop("The x Values you are making a prediction for must be in a List (of Vectors)!")
+  }
+  if(is.null(type)){
+    stop("Please set the type to either `reg` or `class`!")
+  }
+  y_s <- c()
 
-  is_not_leaf <- function(this_node_number){
+
+  is_not_leaf <- function(tree, this_node_number){
     this_node <- tree$A[tree$node == this_node_number]
     if(length(this_node[[1]]) > 1){
       return(TRUE)
@@ -78,7 +89,7 @@ make_prediction <- function(tree, x){
     return(FALSE)
   }
 
-  node_exists <- function(this_node){
+  node_exists <- function(tree, this_node){
     for (i in 1:length(tree$node)) {
       if(this_node == tree$node[[i]]){
         return(TRUE)
@@ -87,11 +98,11 @@ make_prediction <- function(tree, x){
     return(FALSE)
   }
 
-  make_pred <- function(){
+  make_pred <- function(tree, x){
     #current_node is an integer whose value is equal to the nodes position in the full_Tree
     current_node <- tree$node[tree$name == "root"]
-    while(is_not_leaf(current_node) && (node_exists(current_node*2)) || node_exists((current_node*2)+1)){
-      if(node_exists(current_node*2)){
+    while(is_not_leaf(tree, current_node) && ((node_exists(tree, current_node*2)) || node_exists(tree, (current_node*2)+1))){
+      if(node_exists(tree, current_node*2)){
         current_dim <- tree$split_index[tree$node == current_node*2]
         if(x[current_dim] < tree$split_point[tree$node == current_node*2]){
           newNode <- (tree$node[tree$node == current_node])*2
@@ -100,7 +111,7 @@ make_prediction <- function(tree, x){
           newNode <- ((tree$node[tree$node == current_node])*2)+1
           current_node <- tree$node[tree$node == newNode]
         }
-      } else if (node_exists((current_node*2)+1)){
+      } else if (node_exists(tree, (current_node*2)+1)){
         current_dim <- tree$split_index[tree$node == current_node*2+1]
 
         if(x[current_dim] < tree$split_point[tree$node == (current_node*2)+1]){
@@ -112,11 +123,26 @@ make_prediction <- function(tree, x){
         }
       }
     }
-    return(tree$y[tree$node == current_node])
+    return(tree$c_value[tree$node == current_node])
   }
 
-  y <- make_pred()
-  return(y);
+  #For each value to predict, for each tree
+
+  #For each value to predict
+  y_s <- c()
+  for(j in 1:ncol(x_list)){
+    y_list <- c()
+    for (i in 1:length(tree_list)) {
+      y_list <- append(y_list, make_pred(tree_list[[i]], x_list[,j]))
+    }
+
+    if(type == "reg"){
+      y_s <- append(y_s, mean(y_list))
+    } else if(type == "class"){
+      y_s <- append(y_s, tail(names(sort(table(y_list))), 1))
+    }
+  }
+  return(y_s);
 }
 
 

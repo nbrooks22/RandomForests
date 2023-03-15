@@ -4,16 +4,17 @@
 \alias{bagging_classification}
 \title{Bagging Algorithm (Classification)}
 \usage{
-bagging_classification(data, b, pred_val)
+bagging_classification(data, b = 5, pred_val = NULL)
 }
 \arguments{
 \item{data}{a named list that contains classification data\cr the x values have the name x and are in
 the form of a matrix \cr where the row number gives the dimension of the data\cr the y
 values have the name y and are in the form of a vector}
 
-\item{b}{Number of Bags to create}
+\item{b}{Number of Bags to create. The Default Value is 5.}
 
-\item{pred_val}{OPTIONAL: If wanting to predict a Value, a vector of length \cr equal to the number of dimensions in our data set}
+\item{pred_val}{OPTIONAL: If wanting to predict some values in a matrix, each of length \cr equal one less than
+the number of dimensions in our data set. \cr Else, input null.}
 }
 \value{
 A named list with the elements \code{Bagged_Trees} and \code{Prediction}.\cr
@@ -24,5 +25,5 @@ A named list with the elements \code{Bagged_Trees} and \code{Prediction}.\cr
 Bagging Algorithm for Classification data.
 }
 \examples{
-bagging_classification(create_Sample_data_class(1), 4, c(0.1,0.5, 0.6))
+bagging_classification(create_Sample_data_class(1), 4, matrix(c(0.1,0.4,0.6, 0.2, 0.4, 0, 1, 1), ncol = 4))
 }
