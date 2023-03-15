@@ -90,11 +90,12 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_spli
   X <- lapply(seq_len(ncol(data$x)), function(i) data$x[,i])
   n <- length(data$y)
   mean <- 1/n*sum(data$y)
-  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = NA, A = list(NULL), c_value = mean)
+  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = list(NULL), A = list(NULL), c_value = mean)
 
   ##### Algorithmus
   tree[tree$node == 1,]$A[[1]] <- X # A = list of length(X)
   # Zugriff auf Daten von A: A[[1]]
+  tree[tree$node == 1,]$y[[1]] <- as.list(data$y)
 
 
   # Schritt 1
@@ -142,6 +143,19 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_spli
     }
     1/length(A_2) * Y
   }
+  find_y <- function(nodes){
+    tr <- tree[tree$node == nodes,]$A[[1]]
+    Y <- list()
+    for(i in seq_along(X)){
+      # schauen, ob X_i in der Liste ist
+      if(Position(function(x) identical(x, X[[i]]), tr, nomatch = 0) > 0){
+         #if(X[[i]] %in% A1(j,s)) Y <- Y + data$y[i]
+        Y[[length(Y) + 1]] <- data$y[i]
+       }
+       
+     }
+     Y
+   }                  
 
   # mache das hier so lange bis jedes Blatt nur noch einen Datenpunkt hat
   # D.h alle A(v) sind entweder leer oder haben nur ein Element
@@ -244,6 +258,9 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_spli
             add_row(node = 2*v + 1, split_index = opt[1], split_point = opt[2], c_value = c_2) -> tree
           tree[tree$node == 2*v,]$A[[1]] <- A1(opt[1],opt[2],v)
           tree[tree$node == 2*v + 1,]$A[[1]] <- A2(opt[1],opt[2],v)
+          tree[tree$node == 2*v,]$y[[1]] <- find_y(2*v)
+          tree[tree$node == 2*v + 1,]$y[[1]] <- find_y(2*v + 1)
+
           # benenne leafs in leaf um (im Tibble)
           tree %>%
             mutate(name = ifelse(node == v, "inner node", ifelse(node == 2*v, "leaf", ifelse(node == 2*v + 1, "leaf", name)))) -> tree
@@ -267,30 +284,8 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_spli
 
   }
 
-  # wenn alle leafs nur noch ein Punkt enthalten:
-  # y_m einfügen
-  leafs <- find_leaf1(tree)
-  n <- length(data$y)
-  for(leaf in leafs){
-    tr <- tree[tree$node == leaf,]$A[[1]]
-    Y <- 0
-    for(i in seq_along(X)){
-      # schauen, ob X_i in der Liste ist
-      if(Position(function(x) identical(x, X[[i]]), tr, nomatch = 0) > 0) Y <- Y + data$y[i]
-      #if(X[[i]] %in% A1(j,s)) Y <- Y + data$y[i]
-    }
-
-    # hier y verändern
-    tree %>%
-      mutate(y = ifelse(node == leaf, 1/length(tr)*Y, y)) -> tree
-  }
-
-
-
-
   # füge split_point/ split_index hinzu
   tree %>%
-    mutate(y = ifelse(name == "inner node", 0, y)) %>%  # inner Knoten: setze y = 0
     mutate(name = ifelse(node == 1, "root", name)) -> tree # benenne erstes Element in root um
 
   greedyReg$tree <- tree
@@ -402,10 +397,11 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
   X <- lapply(seq_len(ncol(data$x)), function(i) data$x[,i])
   n <- length(data$y)
   mean <- 1/n*sum(data$y)
-  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = NA, A = list(NULL), c_value = mean)
+  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = list(NULL), A = list(NULL), c_value = mean)
 
   ##### Algorithmus
   tree[tree$node == 1,]$A[[1]] <- X # A = list of length(X)
+  tree[tree$node == 1,]$y[[1]] <- as.list(data$y)
 
   K <- length(unique(data$y))
   # Schritt 3
@@ -469,7 +465,18 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
     }
     which.max(obj)
   }
-
+  find_y <- function(nodes){
+    tr <- tree[tree$node == nodes,]$A[[1]]
+    Y <- list()
+    for(i in seq_along(X)){
+      # schauen, ob X_i in der Liste ist
+      if(Position(function(x) identical(x, X[[i]]), tr, nomatch = 0) > 0){
+        Y[[length(Y) + 1]] <- data$y[i]
+      }
+      #if(X[[i]] %in% A1(j,s)) Y <- Y + data$y[i]
+    }
+    Y
+  }
 
 
   cond <- sapply(tree$A, length) # gibt an, wie viele Elemente jeweils in A(v) sind
@@ -565,6 +572,9 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
             add_row(node = 2*v + 1, split_index = opt[1], split_point = opt[2], c_value = c_2) -> tree
           tree[tree$node == 2*v,]$A[[1]] <- A1(opt[1],opt[2],v)
           tree[tree$node == 2*v + 1,]$A[[1]] <- A2(opt[1],opt[2],v)
+          tree[tree$node == 2*v,]$y[[1]] <- find_y(2*v)
+          tree[tree$node == 2*v + 1,]$y[[1]] <- find_y(2*v + 1)
+
           # benenne leafs in leaf um (im Tibble)
           tree %>%
             mutate(name = ifelse(node == v, "inner node", ifelse(node == 2*v, "leaf", ifelse(node == 2*v + 1, "leaf", name)))) -> tree
@@ -588,22 +598,8 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
   }
 
 
-  # y_m verändern
-  leafs <- find_leaf1(tree)
-  n <- length(data$y)
-  for(leaf in leafs){
-    tr <- tree[tree$node == leaf,]$A[[1]]
-    obj <- rep(NA,K)
-    for(k in 1:K){
-      obj[[k]] <- p(k, tr)*length(tr)
-    }
-    tree %>%
-      mutate(y = ifelse(node == leaf, which.max(obj), y)) -> tree
-  }
-
   # füge split_point/ split_index hinzu
   tree %>%
-    mutate(y = ifelse(name == "inner node", 0, y)) %>% # inner Knoten: setze y = 0
     mutate(name = ifelse(node == 1, "root", name)) -> tree # benenne erstes Element in root um
 
   greedyCla$tree <- tree
