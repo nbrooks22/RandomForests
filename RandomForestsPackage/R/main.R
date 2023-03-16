@@ -67,7 +67,25 @@ find_leaf1 <- function(tree){
   return(leafs$node)
 }
 
-#RunDataThroughList of Trees
+
+#' Make Prediction
+#' Make a Prediction of a datapoint or set of datapoints on a tree or set of trees.
+#'
+#'
+#'
+#' @param tree_list A list containing any number >=1 environments (trees) \cr as produced by `greedy_cart()`, `pruning()`, `bagging()`
+#' or `random_forest()`
+#' @param x_list A matrix of values to be predicted, where each column of `x_list` corresponds \cr to one datapoint.
+#' \cr The number of rows corresponds to the dimension of the x values
+#' @param type "reg" for regression trees\cr "class" for classification trees
+#'
+#' @return
+#' @export
+#'
+#' @examples
+#' treelist <- bagging(create_random_sample_data_reg_dim(5, 100, 3), 3, type = "reg")
+#' xlist <- matrix(c(0.1, 0.4, 0.6, 0.2, 0.3, 0.6), ncol = 2)
+#' predictions <- make_prediction(treelist$Bagged_Trees, xlist, "reg")
 make_prediction <- function(tree_list, x_list, type = NULL){
   if(any(class(tree_list) != class(list()))){
     stop("The Tree you are making a prediction for must be in a List!")
