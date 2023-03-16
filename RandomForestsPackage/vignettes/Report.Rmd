@@ -164,7 +164,7 @@ pruning(data_prun$tree,lambda,type="reg")
 
 ### Bestimmung es Parameters `lambda` mittels Cross-Validation `cross_validation`
 
-Die Funktion `cross_validation` nimmt Trainingsdaten `data`, eine Parametermenge `Lambda`, eine natürliche Zahl `m` und den Typ `type` entgegen. Bei Typ handelt es sich wieder um die Unterscheidung zwischen Regression (`type`=reg) und KLassifikation (`type`=class). Die natürliche Zahl `m` gibt mit wievielen Teilmengen eine Partition der Trainingsdaten `data` erstellt werden soll. Der Rückgabewert der Funktion ist die Kompenente des Parametervektors `Lambda`, welche mittels Cross-Validation als bester Schätzer `lambda` für das Pruning-Verfahren geeignet ist. ACHTUNG: Schon für kleines `m` (m \<= 4) und wenige Komponenten in `Lambda` (4 oder weniger Einträge) können hier sehr lange Laufzeiten entstehen. Im Beispiel unten wird mittel `create_random_sample_data_reg(10,10)` ein pseudozufälliges Trainingsdatenset mit 10 Datenpunkten und dem Seed 10 erzeugt. 
+Die Funktion `cross_validation` nimmt Trainingsdaten `data`, eine Parametermenge `Lambda`, eine natürliche Zahl `m` und den Typ `type` entgegen. Bei Typ handelt es sich wieder um die Unterscheidung zwischen Regression (`type`=reg) und KLassifikation (`type`=class). Die natürliche Zahl `m` gibt mit wievielen Teilmengen eine Partition der Trainingsdaten `data` erstellt werden soll. Der Rückgabewert der Funktion ist die Kompenente des Parametervektors `Lambda`, welche mittels Cross-Validation als bester Schätzer `lambda` für das Pruning-Verfahren geeignet ist. ACHTUNG: Schon für kleines `m` (m \<= 4) und wenige Komponenten in `Lambda` (4 oder weniger Einträge) können hier sehr lange Laufzeiten entstehen. Im Beispiel unten wird mittel `create_random_sample_data_reg(10,10)` ein pseudozufälliges Trainingsdatenset mit 10 Datenpunkten und dem Seed 10 erzeugt.
 
 ```{r}
 data <- create_random_sample_data_reg(10,10)
@@ -229,30 +229,30 @@ Die verschiedenen Bäume sehen wie folgt aus:
 for(i in seq_along(data)) print(data[[i]]$tree, n = 5)
 ```
 
-
 ### `make_prediction()`
 
 `make_prediction()` ist eine Funktion die erlaubt, unsere erstellten Bäume auch zu benutzen. Wir wollen den oder die Bäume durchlaufen, und jeweils schauen bei welchem c_value wir landen.
 
 #### `tree_list`
-Eine Liste von Environments, so wie sie von z.b. `greedy_cart()`, `bagging()` oder ähnlichem generiert werden. 
-ACHTUNG: Muss im List() format übergeben werden, auch wenn es nur ein Baum hat
+
+Eine Liste von Environments, so wie sie von z.b. `greedy_cart()`, `bagging()` oder ähnlichem generiert werden. ACHTUNG: Muss im List() format übergeben werden, auch wenn es nur ein Baum hat
+
 ```{r}
 treelist <- bagging(data = data_reg2, b = 3, type = "reg")
 ```
 
 #### `x_list`
+
 Eine Matrix mit den werten die man schätzen will, wo jede spalte einen Vektor von gleicher Dimension wie die x-werte der Eingangsdaten darstellt (in diesem Fall testen wir 4 verschiedene eindimensionale Werte).
+
 ```{r}
 xlist <- matrix(c(0.1, 0.4, 0.6, 0.2), ncol = 2)
 ```
 
 #### `type`
+
 Entweder `type` = "reg" oder `type` = "class", was auch immer die entsprechenden Bäume für Daten haben.
 
 ```{r}
 make_prediction(treelist$Bagged_Trees, xlist, "reg")
 ```
-
-
-
