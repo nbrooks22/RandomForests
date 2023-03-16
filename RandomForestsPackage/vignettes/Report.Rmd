@@ -119,7 +119,7 @@ val <- greedy_cart(x = c(x1, x2), y = y, data = data_class, type = "class", dept
 val$tree
 ```
 
-### `pruning()`
+### Wähle mittels `pruning()` einen bezüglich des Parameters lambda optmierten Teilbaum zu einem bestehendem CART
 
 ### `bagging()`
 
