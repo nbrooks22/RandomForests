@@ -7,7 +7,7 @@ printRegression <- function(data, plotname) {
   plot(data$values$x, data$values$y, xlab = "x1", ylab = "y", main=plotname)
 
   # Trennlinien
-  trennlinien <- data$tree %>% drop_na() %>% filter(split_point > 0) %>% select(split_point) %>% unique() %>% arrange(split_point)
+  trennlinien <- data$tree %>% drop_na() %>% select(split_point) %>% unique() %>% arrange(split_point)
 
   # Plot Trennlinien
   for(linie in trennlinien) {
@@ -25,37 +25,22 @@ printRegression <- function(data, plotname) {
   for (row in 1:nrow(bayesRegelDaten)) {
     value <- bayesRegelDaten$A[[row]][[1]]
     bayesRegel <- bayesRegelDaten$c_value[[row]]
-
-    rightSideBorder <- tryCatch(
-      {
-        trennlinien %>% filter(value <= split_point) %>% min()
-      },
-      error = function(e) {
-        NA
-      }
-    )
-
-    leftSideBorder <- tryCatch(
-      {
-        trennlinien %>% filter(value >= split_point) %>% max()
-      },
-      error = function(e) {
-        NA
-      }
-    )
+    
+    rightSideBorder <- trennlinien %>% filter(value <= split_point) %>% min()
+    leftSideBorder <- trennlinien %>% filter(value >= split_point) %>% max()
 
     # Es existiert keine linke Trennlinie
-    if (is.na(leftSideBorder)) {
+    if (is.infinite(leftSideBorder)) {
       segments(minValue, bayesRegel, rightSideBorder, bayesRegel)
     }
 
     # Es existiert keine rechte Trennlinie
-    if (is.na(rightSideBorder)) {
+    if (is.infinite(rightSideBorder)) {
       segments(leftSideBorder, bayesRegel, maxValue, bayesRegel)
     }
 
     # Es existiert sowohl eine linke als auch eine rechte Trennlinie
-    if (!is.na(leftSideBorder) && !is.na(rightSideBorder)) {
+    if (!is.infinite(leftSideBorder) && !is.infinite(rightSideBorder)) {
       segments(leftSideBorder, bayesRegel, rightSideBorder, bayesRegel)
     }
   }
