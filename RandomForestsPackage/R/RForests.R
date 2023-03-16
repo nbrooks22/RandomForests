@@ -110,6 +110,8 @@ random_forest_regression <- function(data, B, A = NULL, m = 0, num_leaf = NULL, 
 #' \cr the default value is the maximal achievable depth
 #' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
 #' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
+#' @param unique if `unique` is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
+#' \cr the default value is FALSE                       
 #'
 #' @return a list of `B` trees (description for a tree see ?greedy_cart)
 #' @export
@@ -135,7 +137,7 @@ random_forest_regression <- function(data, B, A = NULL, m = 0, num_leaf = NULL, 
 #'
 #'
 #'
-random_forest_classification <- function(data, B, A = NULL, m = 0, num_leaf = NULL, depth = NULL, num_split = 2, min_num = 1){
+random_forest_classification <- function(data, B, A = NULL, m = 0, num_leaf = NULL, depth = NULL, num_split = 2, min_num = 1, unique = FALSE){
 
   # Datenüberprüfung
   # Rest der Datenüberprüfung findet in greedy_cart statt
@@ -161,6 +163,7 @@ random_forest_classification <- function(data, B, A = NULL, m = 0, num_leaf = NU
   if(A > len) {warning("A is too big. A is set to ", len); A <- len}
   if(A <= 0) {warning("A must be greater than 0. A is set to ", len); A <- len}
 
+  if(!is.logical(unique)) {warning("unique must be logical. unique is set to FALSE"); unique <- FALSE}
 
   if(as.integer(num_leaf) != num_leaf) {warning("num_leaf is not an integer. The value is set to ", ceiling(num_leaf)); num_leaf <- ceiling(num_leaf)}
   if(!is.null(depth)){
@@ -184,7 +187,7 @@ random_forest_classification <- function(data, B, A = NULL, m = 0, num_leaf = NU
     # wenn d = 1: data$x[,sam] Problem, da new_data2 keine matrix mehr ist
     # Lösung: drop = FALSE
 
-    tree[[i]] <- greedy_cart_classification(new_data, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m)
+    tree[[i]] <- greedy_cart_classification(new_data, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m, unique = unique)
 
   }
   tree
@@ -211,6 +214,8 @@ random_forest_classification <- function(data, B, A = NULL, m = 0, num_leaf = NU
 #' \cr the default value is the maximal achievable depth
 #' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
 #' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
+#' @param unique parameter for classification data: if `unique` is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
+#' \cr the default value is FALSE                      
 #'
 #' @return a list of `B` trees (description for a tree see ?greedy_cart)
 #'
@@ -242,7 +247,7 @@ random_forest_classification <- function(data, B, A = NULL, m = 0, num_leaf = NU
 #' data_class <- list(x1 = X1, x2 = X2, y = f(X1,X2,e))
 #' random_forest_classification(x = c(x1, x2), y = y, data = data_class, type = "class", B = 5, A = 25, m = 1, depth = 4)
 
-random_forest <- function(x,y,data, type = NULL, B, A = NULL, m = 0, num_leaf = NULL, depth = NULL, num_split = 2, min_num = 1){
+random_forest <- function(x,y,data, type = NULL, B, A = NULL, m = 0, num_leaf = NULL, depth = NULL, num_split = 2, min_num = 1, unique = FALSE){
   x1 <- enexpr(x)
   y1 <- enexpr(y)
   data1 <- eval_tidy(x1,data)
@@ -284,7 +289,7 @@ random_forest <- function(x,y,data, type = NULL, B, A = NULL, m = 0, num_leaf = 
   if(type == "reg"){
     return(random_forest_regression(dat, B = B, A = A, m = m, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num))
   } else if(type == "class"){
-    return(random_forest_classification(dat, B = B, A = A, m = m, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num))
+    return(random_forest_classification(dat, B = B, A = A, m = m, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, unique = unique))
   } else{
     stop("Invalid type!")
   }
