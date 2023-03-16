@@ -10,6 +10,8 @@ server <- function(input, output, session) {
   runjs("$('#file').parent().removeClass('btn-default').addClass('btn-info');")
   runjs("$('#fileMakePrediciton1').parent().removeClass('btn-default').addClass('btn-info');")
   
+  
+  
   # Beispiele
   observeEvent(input$update1, {
     # Wahl des Algorithmus
@@ -86,6 +88,12 @@ server <- function(input, output, session) {
         output$tree <- renderGrViz({
           plotTree(data)
         })
+        
+        # Falls es zuvor deaktiviert wurde, wird es hier wieder aktiviert
+        shinyjs::showElement("caption1")
+        shinyjs::showElement("plot")
+        shinyjs::showElement("caption2")
+        shinyjs::showElement("tree")
       },
       "Pruning - Klassifikationsproblem" = {
         data <- create_random_sample_data_class(1, countElements)
@@ -99,6 +107,12 @@ server <- function(input, output, session) {
         output$tree <- renderGrViz({
           plotTree(data)
         })
+        
+        # Falls es zuvor deaktiviert wurde, wird es hier wieder aktiviert
+        shinyjs::showElement("caption1")
+        shinyjs::showElement("plot")
+        shinyjs::showElement("caption2")
+        shinyjs::showElement("tree")
       },
       "Bagging - Regressionsproblem" = {
         data <- create_random_sample_data_reg(1, countElements)
@@ -140,15 +154,10 @@ server <- function(input, output, session) {
       },
       "Random Forests - Regressionsproblem" = {
         data <- create_random_sample_data_reg(1, countElements)
-        result <- RandomForestsPackage::random_forest_regression(data, numberOfBags, numberOfDataFromTotal, numberOfCoordinates, num_leaf = numLeaf, depth = depth, num_split = numSplit, min_num = minNum)
-        
-        resultListOfTree <- list()
-        for (i in 1:length(result)) {
-          resultListOfTree <- append(resultListOfTree, list(result[[i]]$tree))
-        }
+        data <- RandomForestsPackage::random_forest_regression(data, numberOfBags, numberOfDataFromTotal, numberOfCoordinates, num_leaf = numLeaf, depth = depth, num_split = numSplit, min_num = minNum)
         
         # Trees abspeichern
-        listOfTrees <<- resultListOfTree
+        listOfTrees <<- data
         method <<- "reg"
         
         # Vorhersagen einlesen
@@ -164,15 +173,10 @@ server <- function(input, output, session) {
       },
       "Random Forests - Klassifikationsproblem" = {
         data <- create_random_sample_data_class(1, countElements)
-        result <- RandomForestsPackage::random_forest_classification(data, numberOfBags, numberOfDataFromTotal, numberOfCoordinates, numLeaf, depth, numSplit, minNum, notSplitBySameClass)
-        
-        resultListOfTree <- list()
-        for (i in 1:length(result)) {
-          resultListOfTree <- append(resultListOfTree, list(result[[i]]$tree))
-        }
+        data <- RandomForestsPackage::random_forest_classification(data, numberOfBags, numberOfDataFromTotal, numberOfCoordinates, numLeaf, depth, numSplit, minNum, notSplitBySameClass)
         
         # Trees abspeichern
-        listOfTrees <<- result
+        listOfTrees <<- data
         method <<- "class"
         
         # Vorhersagen einlesen
@@ -218,6 +222,9 @@ server <- function(input, output, session) {
     }
   })
   
+  
+  
+  
   # Nutzerdaten
   observeEvent(input$update2, {
     file <- input$file
@@ -228,12 +235,22 @@ server <- function(input, output, session) {
     minNum <- input$minNum2
     numSplit <- input$numSplit2
     numLeaf <- input$numLeaf2
+    notSplitBySameClass <- input$unique2
     # Pruning
     lambda <- input$lambdaVar2
     # Random Forests
     numberOfDataFromTotal <- input$numberOfDataFromTotal2
+    numberOfCoordinates <- input$numberOfCoordinates2
     # Random Forests und Bagging
     numberOfBags <- input$numberOfBags2
+    
+    output$caption1 <- renderText({
+      return("Plot")
+    })
+    
+    output$caption2 <- renderText({
+      return("Tree")
+    })
     
     if (!is.null(file)) {
       switch (algorithm,
@@ -243,9 +260,6 @@ server <- function(input, output, session) {
                 
                 # Plot wird nur in der ersten Dimension
                 if (data$dim == 1) {
-                  shinyjs::showElement("caption1")
-                  shinyjs::showElement("plot")
-                  
                   output$caption1 <- renderText({
                     return("Plot")
                   })
@@ -253,6 +267,9 @@ server <- function(input, output, session) {
                   output$plot <- renderPlot({
                     printRegression(data, "Gieriges Verfahren - Regressionsproblem")
                   })
+                  
+                  shinyjs::showElement("caption1")
+                  shinyjs::showElement("plot")
                 } else {
                   shinyjs::hideElement("caption1")
                   shinyjs::hideElement("plot")
@@ -265,16 +282,16 @@ server <- function(input, output, session) {
                 output$tree <- renderGrViz({
                   plotTree(data)
                 })
+                
+                shinyjs::showElement("caption2")
+                shinyjs::showElement("tree")
               },
               "Gieriges Verfahren - Klassifikationsproblem" = {
                 data <- readCSV(file, type = 1)
-                data <- RandomForestsPackage::greedy_cart_classification(data, numLeaf, depth, numSplit, minNum)
+                data <- RandomForestsPackage::greedy_cart_classification(data, numLeaf, depth, numSplit, minNum, unique = notSplitBySameClass)
                 
                 # Plot wird nur in der zweiten Dimension
                 if (data$dim == 2) {
-                  shinyjs::showElement("caption1")
-                  shinyjs::showElement("plot")
-                  
                   output$caption1 <- renderText({
                     return("Plot")
                   })
@@ -282,14 +299,165 @@ server <- function(input, output, session) {
                   output$plot <- renderPlot({
                     printClassification(data, "Gieriges Verfahren - Klassifikationsproblem")
                   })
+                  shinyjs::showElement("caption1")
+                  shinyjs::showElement("plot")
                 } else {
                   shinyjs::hideElement("caption1")
                   shinyjs::hideElement("plot")
                 }
                 
+                output$caption2 <- renderText({
+                  return("Tree")
+                })
+                
                 output$tree <- renderGrViz({
                   plotTree(data)
                 })
+                
+                shinyjs::showElement("caption2")
+                shinyjs::showElement("tree")
+              },
+              "Pruning - Regressionsproblem" = {
+                data <- readCSV(file, type = 0)
+                data <- RandomForestsPackage::greedy_cart_regression(data, numLeaf, depth, numSplit, minNum)
+                data$tree <- RandomForestsPackage:::pruning(data$tree, lambda, type = "reg")
+                
+                # Plot wird nur in der ersten Dimension
+                if (data$dim == 1) {
+                  output$caption1 <- renderText({
+                    return("Plot")
+                  })
+                  
+                  output$plot <- renderPlot({
+                    printRegression(data, "Gieriges Verfahren - Regressionsproblem")
+                  })
+                  
+                  shinyjs::showElement("caption1")
+                  shinyjs::showElement("plot")
+                } else {
+                  shinyjs::hideElement("caption1")
+                  shinyjs::hideElement("plot")
+                }
+                
+                output$caption2 <- renderText({
+                  return("Tree")
+                })
+                
+                output$tree <- renderGrViz({
+                  plotTree(data)
+                })
+                
+                shinyjs::showElement("caption2")
+                shinyjs::showElement("tree")
+              },
+              "Pruning - Klassifikationsproblem" = {
+                data <- readCSV(file, type = 1)
+                data <- RandomForestsPackage::greedy_cart_classification(data, numLeaf, depth, numSplit, minNum, unique = notSplitBySameClass)
+                data$tree <- RandomForestsPackage:::pruning(data$tree, lambda, type = "class")
+                
+                # Plot wird nur in der zweiten Dimension
+                if (data$dim == 2) {
+                  output$caption1 <- renderText({
+                    return("Plot")
+                  })
+                  
+                  output$plot <- renderPlot({
+                    printRegression(data, "Gieriges Verfahren - Regressionsproblem")
+                  })
+                  
+                  shinyjs::showElement("caption1")
+                  shinyjs::showElement("plot")
+                } else {
+                  shinyjs::hideElement("caption1")
+                  shinyjs::hideElement("plot")
+                }
+                
+                output$caption2 <- renderText({
+                  return("Tree")
+                })
+                
+                output$tree <- renderGrViz({
+                  plotTree(data)
+                })
+                
+                shinyjs::showElement("caption2")
+                shinyjs::showElement("tree")
+              },
+              "Bagging - Regressionsproblem" = {
+                data <- readCSV(file, type = 0)
+                data <- RandomForestsPackage::bagging(data, numberOfBags, "reg")
+                
+                # Trees abspeichern
+                listOfTrees <<- data$Bagged_Trees
+                method <<- "reg"
+                
+                # Vorhersagen einlesen
+                shinyjs::showElement("makePrediction2")
+                shinyjs::showElement("fileMakePrediciton2")
+                shinyjs::showElement("makePredictionButton2")
+                
+                # Plot und Tree deaktivieren
+                shinyjs::hideElement("caption1")
+                shinyjs::hideElement("plot")
+                shinyjs::hideElement("caption2")
+                shinyjs::hideElement("tree")
+              },
+              "Bagging - Klassifikationsproblem" = {
+                data <- readCSV(file, type = 1)
+                data <- RandomForestsPackage::bagging(data, numberOfBags, "class")
+                
+                # Trees abspeichern
+                listOfTrees <<- data$Bagged_Trees
+                method <<- "class"
+                
+                # Vorhersagen einlesen
+                shinyjs::showElement("makePrediction2")
+                shinyjs::showElement("fileMakePrediciton2")
+                shinyjs::showElement("makePredictionButton2")
+                
+                # Plot und Tree deaktivieren
+                shinyjs::hideElement("caption1")
+                shinyjs::hideElement("plot")
+                shinyjs::hideElement("caption2")
+                shinyjs::hideElement("tree")
+              },
+              "Random Forests - Regressionsproblem" = {
+                data <- data <- readCSV(file, type = 0)
+                data <- RandomForestsPackage::random_forest_regression(data, numberOfBags, numberOfDataFromTotal, numberOfCoordinates, num_leaf = numLeaf, depth = depth, num_split = numSplit, min_num = minNum)
+                
+                # Trees abspeichern
+                listOfTrees <<- data
+                method <<- "reg"
+                
+                # Vorhersagen einlesen
+                shinyjs::showElement("makePrediction2")
+                shinyjs::showElement("fileMakePrediciton2")
+                shinyjs::showElement("makePredictionButton2")
+                
+                # Plot und Tree deaktivieren
+                shinyjs::hideElement("caption1")
+                shinyjs::hideElement("plot")
+                shinyjs::hideElement("caption2")
+                shinyjs::hideElement("tree")
+              },
+              "Random Forests - Klassifikationsproblem" = {
+                data <- readCSV(file, type = 1)
+                data <- RandomForestsPackage::random_forest_classification(data, numberOfBags, numberOfDataFromTotal, numberOfCoordinates, numLeaf, depth, numSplit, minNum, notSplitBySameClass)
+                
+                # Trees abspeichern
+                listOfTrees <<- data
+                method <<- "class"
+                
+                # Vorhersagen einlesen
+                shinyjs::showElement("makePrediction2")
+                shinyjs::showElement("fileMakePrediciton2")
+                shinyjs::showElement("makePredictionButton2")
+                
+                # Plot und Tree deaktivieren
+                shinyjs::hideElement("caption1")
+                shinyjs::hideElement("plot")
+                shinyjs::hideElement("caption2")
+                shinyjs::hideElement("tree")
               }
       )
     } else {
@@ -325,7 +493,9 @@ server <- function(input, output, session) {
       warning("Es wurde keine Vorhersage eingegeben!")
     }
   })
-
+  
+  
+  
   # Zeige Lambda, M ect. bei den Beispielen
   observeEvent(input$algorithm1, {
     algorithm1 <- input$algorithm1
