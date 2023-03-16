@@ -310,6 +310,8 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_spli
 #' \cr the default value is the maximal achievable number of leaves (the number of data points)
 #' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration
 #' \cr the default value is the dimension of the data
+#' @param unique if `unique` is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
+#' \cr the default value is FALSE
 #'
 #' @return An environment with the elements `dim`, `values` and `tree`.\cr
 #' `dim`: the dimension of the data. \cr
@@ -349,7 +351,7 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_spli
 #' val <- greedy_cart_classification(data, num_split = 10)
 #' val$values
 #' val$tree
-greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_split = 2, min_num = 1, m = 0){
+greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_split = 2, min_num = 1, m = 0, unique = FALSE){
 
   if(is.null(num_leaf)) num_leaf <- length(data$y)
   d <- nrow(data$x)
@@ -360,6 +362,8 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
   if (num_split < 2) {warning("num_split must be greater than or equal to 2. num_split is set to 2"); num_split <- 2}
   if (min_num < 1) {warning("min_num must be greater than or equal to 1. min_num is set to 1"); min_num <- 1}
   if (num_leaf < 1) {warning("num_leaf must be greater than or equal to 1. num_leaf is set to ", length(data$y)); num_leaf <- length(data$y)}
+
+  if(!is.logical(unique)) {warning("unique must be logical. unique is set to FALSE"); unique <- FALSE}
 
   if(is.null(depth)) depth <- -1
   if(as.integer(num_leaf) != num_leaf) {warning("num_leaf is not an integer. The value is set to ", ceiling(num_leaf)); num_leaf <- ceiling(num_leaf)}
@@ -397,8 +401,7 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
   # schreibe Beobachtungen von X in Liste (Elemente sind die Spalten)
   X <- lapply(seq_len(ncol(data$x)), function(i) data$x[,i])
   n <- length(data$y)
-  mean <- 1/n*sum(data$y)
-  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = list(NULL), A = list(NULL), c_value = mean)
+  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = list(NULL), A = list(NULL), c_value = 0)
 
   ##### Algorithmus
   tree[tree$node == 1,]$A[[1]] <- X # A = list of length(X)
@@ -446,6 +449,13 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
     if(length(A) == 0) return(0)
     return(idx/length(A))
   }
+
+  obj <- rep(NA,K)
+  A_X <- tree[tree$node == 1, ]$A[[1]]
+  for(k in 1:K){
+    obj[[k]] <- p(k, A_X)
+  }
+  tree[tree$node == 1, ]$c_value <- which.max(obj)
 
   # c1
   c1 <- function(j,s,v){
@@ -497,7 +507,9 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
     for(v in leafs){
       # nur wenn length(A(v)) > 1
       if(length(tree[tree$node == v,]$A[[1]]) %in% 0:(num_split - 1)) next
-
+      if(unique){
+        if(length(unique(tree[tree$node == v,]$y[[1]])) == 1) next
+      }
 
       # Schritt 3
       # löse das Minimierungsproblem
@@ -626,6 +638,8 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
 #' \cr the default value is the maximal achievable number of leaves (the number of data points)
 #' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration
 #' \cr the default value is the dimension of the data
+#' @param unique parameter for classification data: if `unique` is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
+#' \cr the default value is FALSE
 #'
 #' @return An environment with the elements `dim`, `values` and `tree`.\cr
 #' `dim`: the dimension of the data. \cr
@@ -674,7 +688,7 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
 #' val$tree
 
 
-greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = NULL, num_split = 2, min_num = 1, m = 0){
+greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = NULL, num_split = 2, min_num = 1, m = 0, unique = FALSE){
   # Daten umformatieren
   # hier kann man auch schauen, ob die Daten
   # in der richtigen Struktur sind
@@ -721,7 +735,7 @@ greedy_cart <- function(x,y,data, type = NULL, num_leaf = NULL ,depth = NULL, nu
   if(type == "reg"){
     return(greedy_cart_regression(dat, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m))
   } else if(type == "class"){
-    return(greedy_cart_classification(dat, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m))
+    return(greedy_cart_classification(dat, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m, unique = unique))
   } else{
     stop("Invalid type!")
   }

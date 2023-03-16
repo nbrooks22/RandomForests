@@ -389,7 +389,27 @@ partition <- function(data,m=2)
 
 
 
-
+#' Cross Validation (Regression)
+#' @description Chooses optimal parameter lambda from vector \code{Lambda}
+#'
+#'@param data  A list of training data.
+#'@param m Integer
+#'@param Lambda Vector of possible lambda values
+#'@param type Either \code{"reg"} or \code{"class"}
+#'
+#'@return The optimal lambda estimation
+#'
+#'@details The integer \code{m} lets you choose how many subsets the partition of the training data \code{data} should have.
+#' For each complement of the subset and every component of \code{Lambda} pruning will be conducted. The function
+#' returns the entry of \code{Lambda}, which minimizes the risk of the trees given through the pruninig process.
+#'
+#'
+#'@examples
+#'data <- create_random_sample_data_reg(10,10)
+#'Lambda <- c(1,2,3)/100
+#'cross_validation_reg(data, Lambda, m=3)
+#'
+#'@export
 cross_validation_reg <- function(data, Lambda,m){
   list <- partition(data,m)
   cv <- vector(mode="numeric",length=0L)
@@ -407,6 +427,29 @@ cross_validation_reg <- function(data, Lambda,m){
   return(Lambda[which.min(cv)])
 }
 
+
+
+#' Cross Validation (Classification)
+#' @description Chooses optimal parameter lambda from vector \code{Lambda}
+#'
+#'@param data  A list of training data.
+#'@param m Integer
+#'@param Lambda Vector of possible lambda values
+#'@param type Either \code{"reg"} or \code{"class"}
+#'
+#'@return The optimal lambda estimation
+#'
+#'@details The integer \code{m} lets you choose how many subsets the partition of the training data \code{data} should have.
+#' For each complement of the subset and every component of \code{Lambda} pruning will be conducted. The function
+#' returns the entry of \code{Lambda}, which minimizes the risk of the trees given through the pruninig process.
+#'
+#'
+#'@examples
+#'data <- create_Sample_data_class(11)
+#'Lambda <- c(1,2,3)/100
+#'cross_validation_class(data, Lambda, m=3)
+#'
+#'@export
 cross_validation_class <- function(data, Lambda,m){
   list <- partition(data,m)
   cv <- vector(mode="numeric",length=0L)
@@ -424,6 +467,27 @@ cross_validation_class <- function(data, Lambda,m){
 }
 
 
+
+#' Cross Validation
+#' @description Chooses optimal parameter lambda from vector \code{Lambda}
+#'
+#'@param data  A list of training data.
+#'@param m Integer
+#'@param Lambda Vector of possible lambda values
+#'@param type Either \code{"reg"} or \code{"class"}
+#'
+#'@return The optimal lambda estimation
+#'
+#'@details Choose the type of cross validation (regression or classification) which should be used.
+#'See \code{cross_validation_reg} or \code{cross_validation_class} for further details.\cr
+#'Return error if no valid type is chosen.
+#'
+#'@examples
+#'data <- create_random_sample_data_reg(10,10)
+#'Lambda <- c(1,2,3)/100
+#'cross_validation(data, Lambda, m=3, type="reg")
+#'
+#'@export
 cross_validation <- function(data,Lambda,m,type=NULL)
 {
   if(type == "reg"){
@@ -434,3 +498,6 @@ cross_validation <- function(data,Lambda,m,type=NULL)
     stop("Invalid type!")
   }
 }
+
+
+

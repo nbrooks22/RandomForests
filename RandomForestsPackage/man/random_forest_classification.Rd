@@ -12,7 +12,8 @@ random_forest_classification(
   num_leaf = NULL,
   depth = NULL,
   num_split = 2,
-  min_num = 1
+  min_num = 1,
+  unique = FALSE
 )
 }
 \arguments{
@@ -38,6 +39,9 @@ values have the name y and are in the form of a vector}
 \item{num_split}{split only nodes which contain at least \code{num_split} elements \cr must be greater than or equal to 2}
 
 \item{min_num}{only split a node, if both child nodes have at least \code{min_num} elements \cr must be greater than or equal to 1}
+
+\item{unique}{if \code{unique} is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
+\cr the default value is FALSE}
 }
 \value{
 a list of \code{B} trees (description for a tree see ?greedy_cart)

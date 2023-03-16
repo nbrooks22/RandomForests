@@ -27,6 +27,6 @@ A named list with the elements \code{Bagged_Trees} and \code{Prediction}.\cr
 Bagging Algorithm for Regression or Classification Data
 }
 \examples{
-bagging(create_random_sample_data_reg_dim(5, 100, 4), 3, type = "reg", matrix(c(0.1, 0.4, 0.6, 0.2, 0.3, 0.6), ncol = 2))
+bagging(create_random_sample_data_reg_dim(5, 100, 3), 3, type = "reg", matrix(c(0.1, 0.4, 0.6, 0.2, 0.3, 0.6), ncol = 2))
 bagging(create_Sample_data_class(1), 4, type = "class", matrix(c(0.1,0.4,0.6, 0.2, 0.4, 0, 1, 1), ncol = 4))
 }
