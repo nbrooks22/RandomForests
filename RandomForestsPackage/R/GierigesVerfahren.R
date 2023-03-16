@@ -311,7 +311,7 @@ greedy_cart_regression <- function(data, num_leaf = NULL, depth = NULL, num_spli
 #' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration
 #' \cr the default value is the dimension of the data
 #' @param unique if `unique` is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
-#' \cr the default value is FALSE                       
+#' \cr the default value is FALSE
 #'
 #' @return An environment with the elements `dim`, `values` and `tree`.\cr
 #' `dim`: the dimension of the data. \cr
@@ -364,7 +364,7 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
   if (num_leaf < 1) {warning("num_leaf must be greater than or equal to 1. num_leaf is set to ", length(data$y)); num_leaf <- length(data$y)}
 
   if(!is.logical(unique)) {warning("unique must be logical. unique is set to FALSE"); unique <- FALSE}
-    
+
   if(is.null(depth)) depth <- -1
   if(as.integer(num_leaf) != num_leaf) {warning("num_leaf is not an integer. The value is set to ", ceiling(num_leaf)); num_leaf <- ceiling(num_leaf)}
   if(as.integer(depth) != depth) {warning("depth is not an integer. The value is set to ", ceiling(depth)); depth <- ceiling(depth)}
@@ -401,8 +401,7 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
   # schreibe Beobachtungen von X in Liste (Elemente sind die Spalten)
   X <- lapply(seq_len(ncol(data$x)), function(i) data$x[,i])
   n <- length(data$y)
-  mean <- 1/n*sum(data$y)
-  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = list(NULL), A = list(NULL), c_value = mean)
+  tree <- tibble(node = 1, name = "leaf", split_index = NA, split_point = NA, y = list(NULL), A = list(NULL), c_value = 0)
 
   ##### Algorithmus
   tree[tree$node == 1,]$A[[1]] <- X # A = list of length(X)
@@ -450,6 +449,13 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
     if(length(A) == 0) return(0)
     return(idx/length(A))
   }
+
+  obj <- rep(NA,K)
+  A_X <- tree[tree$node == 1, ]$A[[1]]
+  for(k in 1:K){
+    obj[[k]] <- p(k, A_X)
+  }
+  tree[tree$node == 1, ]$c_value <- which.max(obj)
 
   # c1
   c1 <- function(j,s,v){
@@ -633,7 +639,7 @@ greedy_cart_classification <- function(data, num_leaf = NULL, depth = NULL, num_
 #' @param m parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration
 #' \cr the default value is the dimension of the data
 #' @param unique parameter for classification data: if `unique` is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
-#' \cr the default value is FALSE                      
+#' \cr the default value is FALSE
 #'
 #' @return An environment with the elements `dim`, `values` and `tree`.\cr
 #' `dim`: the dimension of the data. \cr

@@ -13,7 +13,8 @@ greedy_cart(
   depth = NULL,
   num_split = 2,
   min_num = 1,
-  m = 0
+  m = 0,
+  unique = FALSE
 )
 }
 \arguments{
@@ -38,6 +39,9 @@ greedy_cart(
 
 \item{m}{parameter for Random Forest algorithm: positive number of coordinates which we want to use in each iteration
 \cr the default value is the dimension of the data}
+
+\item{unique}{parameter for classification data: if \code{unique} is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
+\cr the default value is FALSE}
 }
 \value{
 An environment with the elements \code{dim}, \code{values} and \code{tree}.\cr

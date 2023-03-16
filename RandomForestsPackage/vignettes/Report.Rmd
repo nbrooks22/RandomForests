@@ -118,6 +118,14 @@ Analog funktioniert das gierige Verfahren für Klassifikationsprobleme.
 val <- greedy_cart(x = c(x1, x2), y = y, data = data_class, type = "class", depth = 3)
 val$tree
 ```
+Bei dem Klassifikationsverfahren kommt noch eine weitere Abbruchbedingung hinzu:
+
+##### `unique`
+Wenn sich nur noch Daten einer Klasse in einem Knoten befinden, wird dieser Knoten nicht weiter aufgeteilt.
+```{r, eval = FALSE}
+greedy_cart(x = c(x1,x2), y = y, data = data_class, type = "class", unique = TRUE)
+```
+
 
 ### Wähle mittels `pruning()` einen bezüglich des Parameters lambda optmierten Teilbaum zu einem bestehendem CART
 `pruning()` nimmt einen Entscheidungsbaum (CART), einen Parameter `lambda` und einen Typ entgegen. Bei `type` handelt es sich um die Art des Verfahrens. Hierbei steht
