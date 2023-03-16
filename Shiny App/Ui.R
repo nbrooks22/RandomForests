@@ -70,7 +70,8 @@ ui <- fluidPage(
                              hidden(
                                numericInput("numberOfBags1",
                                             "Anzahl der Taschen",
-                                            value = 0)
+                                            value = 1,
+                                            min = 1)
                              )
                     ),
                     
@@ -86,6 +87,25 @@ ui <- fluidPage(
                                     actionButton("update1", "Update", icon("rotate"),
                                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
                              ),
+                    
+                    tags$div(title="Ein n-dimensionaler Vektor. Beispieleingabe: 1, 2, 3",
+                             hidden(
+                               textInput("makePrediction1",
+                                         "Vorhersage")
+                             )
+                    ),
+                    
+                    tags$div(title="Die CSV-Datei besitzt m Spalten mit n Zeilen, wobei m die Anzahl der Vorhersagen sind und n die Dimension.",
+                             hidden(
+                               fileInput("fileMakePrediciton1", "CSV-Datei einlesen", accept = ".csv")
+                             )
+                    ),
+                    
+                    hidden(
+                      actionButton("makePredictionButton1", "Berechne Vorhersage", icon("rotate"),
+                                   style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                    ),
+                    
                     width = 100,
                     )),
            
@@ -152,7 +172,8 @@ ui <- fluidPage(
                              hidden(
                                numericInput("numberOfBags2",
                                             "Anzahl der Taschen",
-                                            value = 0)
+                                            value = 1,
+                                            min = 1)
                              )
                     ),
                     

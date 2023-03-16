@@ -4,7 +4,7 @@ source("AdditionalFunctions.R")
 server <- function(input, output, session) {
   # Button-Style
   runjs("$('#file').parent().removeClass('btn-default').addClass('btn-info');")
-
+  runjs("$('#fileMakePrediciton1').parent().removeClass('btn-default').addClass('btn-info');")
   
   # Beispiele
   observeEvent(input$update1, {
@@ -41,7 +41,7 @@ server <- function(input, output, session) {
         data <- RandomForestsPackage::greedy_cart_regression(data, numLeaf, depth, numSplit, minNum)
         
         output$plot <- renderPlot({
-            printGreedyCartRegression(data)
+            printRegression(data, "Gieriges Verfahren - Regressionsproblem")
         })
         
         output$tree <- renderGrViz({
@@ -53,7 +53,7 @@ server <- function(input, output, session) {
         data <- RandomForestsPackage::greedy_cart_classification(data, numLeaf, depth, numSplit, minNum)
         
         output$plot <- renderPlot({
-          printGreedyCartClassification(data)
+          printClassification(data, "Gieriges Verfahren - Klassifikationsproblem")
         })
         
         output$tree <- renderGrViz({
@@ -64,7 +64,15 @@ server <- function(input, output, session) {
         data <- create_random_sample_data_reg(1, countElements)
         data <- RandomForestsPackage::greedy_cart_regression(data, numLeaf, depth, numSplit, minNum)
         data$tree <- RandomForestsPackage:::pruning_regression(data$tree, lambda)
-        print(data)
+        data$tree[data$tree$name == "leaf", ]$y <- data$tree %>% filter(name == "leaf") %>% .$c_value
+        
+        output$plot <- renderPlot({
+          printRegression(data, "Pruning - Regressionsproblem")
+        })
+        
+        output$tree <- renderGrViz({
+          plotTree(data)
+        })
       },
       "Pruning - Klassifikationsproblem" = {
         data <- create_random_sample_data_class(1, countElements)
@@ -73,11 +81,19 @@ server <- function(input, output, session) {
       "Bagging - Regressionsproblem" = {
         data <- create_random_sample_data_reg(1, countElements)
         data <- RandomForestsPackage::bagging_regression(data, numberOfBags)
-        print(data)
+        
+        # Vorhersagen einlesen
+        shinyjs::showElement("makePrediction1")
+        shinyjs::showElement("fileMakePrediciton1")
+        shinyjs::showElement("makePredictionButton1")
       },
       "Bagging - Klassifikationsproblem" = {
         data <- create_random_sample_data_class(1, countElements)
         data <- RandomForestsPackage::bagging_classification(data, numberOfBags)
+        
+        # Vorhersagen einlesen
+        shinyjs::showElement("makePrediction1")
+        shinyjs::showElement("fileMakePrediciton1")
       },
       "Random Forests - Regressionsproblem" = {
         data <- create_random_sample_data_reg(1, countElements)
@@ -125,7 +141,7 @@ server <- function(input, output, session) {
                   })
                   
                   output$plot <- renderPlot({
-                    printGreedyCartRegression(data)
+                    printRegression(data, "Gieriges Verfahren - Regressionsproblem")
                   })
                 } else {
                   shinyjs::hideElement("caption1")
@@ -154,7 +170,7 @@ server <- function(input, output, session) {
                   })
                   
                   output$plot <- renderPlot({
-                    printGreedyCartRegression(data)
+                    printClassification(data, "Gieriges Verfahren - Klassifikationsproblem")
                   })
                 } else {
                   shinyjs::hideElement("caption1")

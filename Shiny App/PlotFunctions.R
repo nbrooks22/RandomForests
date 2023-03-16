@@ -2,9 +2,9 @@
 #                         Plot Gieriges-Verfahren Regression
 ####################################################################################
 
-printGreedyCartRegression <- function(data) {
+printRegression <- function(data, plotname) {
   # Plot Daten
-  plot(data$values$x, data$values$y, xlab = "x1", ylab = "y", main="Gieriges Verfahren Regressionsproblem")
+  plot(data$values$x, data$values$y, xlab = "x1", ylab = "y", main=plotname)
 
   # Trennlinien
   trennlinien <- data$tree %>% drop_na() %>% filter(split_point > 0) %>% select(split_point) %>% unique() %>% arrange(split_point)
@@ -53,11 +53,11 @@ printGreedyCartRegression <- function(data) {
 #                     Plot Gieriges-Verfahren Klassifikation
 ####################################################################################
 
-printGreedyCartClassification <- function(data) {
+printClassification <- function(data, plotname) {
   pal <- palette(c("red", "blue"))
   
   # Plot Daten
-  plot(data$values$x[1], data$values$y[1], xlim=c(0, 1), ylim=c(0, 1), xlab = "x1", ylab = "x2", main="Gieriges Verfahren Klassifikationsproblem", col = pal[data$values$classes[1]])
+  plot(data$values$x[1], data$values$y[1], xlim=c(0, 1), ylim=c(0, 1), xlab = "x1", ylab = "x2", main=plotname, col = pal[data$values$classes[1]])
 
   for (point in 2:nrow(data$values)) {
     points(data$values$x[point], data$values$y[point], col = pal[data$values$classes[point]])
