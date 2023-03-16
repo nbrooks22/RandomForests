@@ -16,6 +16,7 @@ shinyApp(ui, server,
              rm("server", "ui",
                 "printRegression", "printClassification", "plotTree", "moveSplit",
                 "readCSV", "create_random_sample_data_reg", "create_random_sample_data_class",
+                "listOfTrees", "method",
                 envir = .GlobalEnv)
            })
          })

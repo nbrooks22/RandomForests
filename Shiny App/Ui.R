@@ -56,6 +56,12 @@ ui <- fluidPage(
                                           min = 0)
                     ),
                     
+                    tags$div(title="Wenn alle Datenpunkte einer Node die selbe Klasse angehören, wir kein Split mehr vorgenommen.",
+                             hidden(
+                               checkboxInput("unique1", "Keine Splittung durchführen, wenn Klasse identisch", value = TRUE)
+                             )
+                    ),
+                    
                     tags$div(title="Gewichtung der Blätter.",
                              hidden(
                                textOutput("helpTextForPruningAndRandomForests1"),
@@ -83,15 +89,23 @@ ui <- fluidPage(
                              )
                     ),
                     
+                    tags$div(title="Anzahl der Koordinaten.",
+                             hidden(
+                               numericInput("numberOfCoordinates1",
+                                            "Anzahl der Koordinaten",
+                                            value = 0)
+                             )
+                    ),
+                    
                     fluidRow(column(12, align = "center",
                                     actionButton("update1", "Update", icon("rotate"),
                                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
                              ),
                     
-                    tags$div(title="Ein n-dimensionaler Vektor. Beispieleingabe: 1, 2, 3",
+                    tags$div(title="Ein n-dimensionaler Vektor, wobei jeder Eintrag >= 1 ist. Beispieleingabe: 1,2,3",
                              hidden(
                                textInput("makePrediction1",
-                                         "Vorhersage")
+                                         "Schätzung")
                              )
                     ),
                     
@@ -101,10 +115,16 @@ ui <- fluidPage(
                              )
                     ),
                     
-                    hidden(
-                      actionButton("makePredictionButton1", "Berechne Vorhersage", icon("rotate"),
-                                   style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                    fluidRow(
+                      column(12, align="center",
+                             hidden(
+                               actionButton("makePredictionButton1", "Berechne Schätzung", icon("rotate"),
+                                            style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                               textOutput("textForPrediction1")
+                            )
+                      )
                     ),
+                    
                     
                     width = 100,
                     )),
