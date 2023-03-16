@@ -2,32 +2,56 @@
 % Please edit documentation in R/RForests.R
 \name{random_forest_regression}
 \alias{random_forest_regression}
-\title{RANDOM FOREST ALGORITHM (Regression)}
+\title{Random Forest Algorithm (Regression)}
 \usage{
 random_forest_regression(
   data,
   B,
-  A,
-  m,
+  A = NULL,
+  m = 0,
   num_leaf = NULL,
-  depth = 0,
+  depth = NULL,
   num_split = 2,
   min_num = 1
 )
 }
 \arguments{
-\item{data}{Tibble that contains Regression Data}
+\item{data}{a named list that contains regression data\cr the x values have the name x and are in
+the form of a matrix where the row number gives the dimension of the data\cr the y
+values have the name y and are in the form of a vector}
 
-\item{m}{Number of Samples that should be aquired}
+\item{B}{number of Bags to create}
 
-\item{t}{Condition to End: The Tree has t leaves (insert tea leaf pun here)}
+\item{A}{sample size we want to use
+\cr must be greater than 0 and less than or equal to the number of observations
+\cr the default value is the size of the data (so all observations are used)}
+
+\item{m}{positive number of coordinates which we want to use in each iteration
+\cr the default value is the dimension of the data}
+
+\item{num_leaf}{Condition to end: the tree has \code{num_leaf} leaves \cr must be greater than or equal to 1
+\cr the default value is the maximal achievable number of leaves (the number of data points)}
+
+\item{depth}{Condition to end: the tree has depth \code{depth}\cr must be greater than or equal to 0
+\cr the default value is the maximal achievable depth}
+
+\item{num_split}{split only nodes which contain at least \code{num_split} elements \cr must be greater than or equal to 2}
+
+\item{min_num}{only split a node, if both child nodes have at least \code{min_num} elements \cr must be greater than or equal to 1}
 }
 \value{
-tree in format: Tibble (BFS)
+a list of \code{B} trees (description for a tree see ?greedy_cart)
 }
 \description{
-Condition to End: The Tree has t leaves - 6.52
+Random Forest Algorithm for regression data
 }
 \examples{
-random_forest_regression(create_random_sample_data_reg(10, 100), 30, 40)
+X1 <- runif(50,0,1)
+X2 <- runif(50,0,1)
+X3 <- runif(50,0,1)
+Y <- X1 + X2 + X3
+data <- list(x = matrix(c(X1,X2,X3), nrow = 3, byrow = TRUE), y = Y)
+random_forest_regression(data, B = 5, A = 25, m = 2, num_leaf = 10)
+
+
 }

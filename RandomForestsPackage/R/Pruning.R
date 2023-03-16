@@ -1,3 +1,4 @@
+
 #' Count leaves for a given CART
 #'
 #' @param data A tibble containing the information of each node type of the CART in the colum "name".
@@ -51,25 +52,32 @@ cut_tree <- function(trees,new_leaf)
 
 }
 
-risk_tree <- function(trees)
+risk_tree_reg <- function(trees)
 {
-  y_vec <- filter(trees, !(trees$y == 0))$y
-  c_vec <- filter(trees, !(trees$y == 0))$c_value
-  y_vec
-  c_vec
+  y_vec <- filter(trees, !(trees$y == 0))$y # Erzeuge Vektor aus allen y-Werten der Trainingsdaten
+  c_vec <- filter(trees, !(trees$y == 0))$c_value # Erzeuge Vektor aus den zugehörigen Schätzwerten
 
-  risk <- sum( (y_vec-c_vec)^2,na.rm = TRUE)/length(y_vec)
+  risk <- sum( (y_vec-c_vec)^2,na.rm = TRUE)/length(y_vec) #Riskowert des Baums für die Verlustfunktion im Regressionsproblem
   risk
   return(risk)
 }
 
+risk_tree_class <- function(trees)
+{
+  y_vec <- filter(trees, !(trees$y ==0))$y   # Erzeuge Vektor aus allen y-Werten der Trainingsdaten
+  c_vec <- filter(trees, !(trees$y ==0))$c_value # Erzeuge Vektor aus den zugehörigen Schätzwerten
 
-tree_seq <- function(trees)
+
+  risk <- sum(!(y_vec == c_vec))/length(y_vec) # Riskowert des Baums für die Verlustfunktion im Klassifikationsproblem
+  return(risk)
+}
+
+tree_seq_reg <- function(trees)
   {
   trees %>% filter(name=="old leaf") %>% mutate(name="older leaf") -> older_leaves
   older_leaves
   bind_rows(anti_join(trees,older_leaves,by="node"),older_leaves) %>% arrange(node) -> trees
-  risk <- risk_tree(trees)
+  risk <- risk_tree_reg(trees)
   trees <- mutate(trees,risk=risk)
   #print(trees,n=39)
 
@@ -85,34 +93,69 @@ tree_seq <- function(trees)
     new_leaf <- inner_nodes[n]    # Wähle inneren Knoten an dem abgeschnitten wird
     new_leaf
     subtree <- cut_tree(trees,new_leaf) # Neuer Teilbaum bei dem an new_leaf abgeschnitten wurde
-    subtree %>% mutate(risk=risk_tree(subtree)) -> subtree
+    subtree %>% mutate(risk=risk_tree_reg(subtree)) -> subtree
 
 
-    risk2 <- (risk_tree(subtree)-risk)/(leaves-count_leaves(subtree))
+    risk2 <- (risk_tree_reg(subtree)-risk)/(leaves-count_leaves(subtree))
     risk2
 
     a <- c(a,risk2)
     a
   }
   min_subtree <- cut_tree(trees,inner_nodes[which.min(a)])
-  min_subtree %>% mutate(risk=risk_tree(min_subtree)) -> min_subtree
+  min_subtree %>% mutate(risk=risk_tree_reg(min_subtree)) -> min_subtree
   min_subtree
   return(min_subtree)
 }
 
+tree_seq_class <- function(trees)
+{
+  trees %>% filter(name=="old leaf") %>% mutate(name="older leaf") -> older_leaves
+  older_leaves
+  bind_rows(anti_join(trees,older_leaves,by="node"),older_leaves) %>% arrange(node) -> trees
+  risk <- risk_tree_class(trees)
+  trees <- mutate(trees,risk=risk)
+  #print(trees,n=39)
+
+  leaves <- count_leaves(trees)
+  leaves
+
+  inner_nodes <- c(trees$node[trees$name=="root"],trees$node[trees$name=="inner node"])
+  inner_nodes
+
+  a <- vector(mode="numeric",length=0L)
+  for (n in seq_along(inner_nodes))
+  {
+    new_leaf <- inner_nodes[n]    # Wähle inneren Knoten an dem abgeschnitten wird
+    new_leaf
+    subtree <- cut_tree(trees,new_leaf) # Neuer Teilbaum bei dem an new_leaf abgeschnitten wurde
+    subtree %>% mutate(risk=risk_tree_class(subtree)) -> subtree
+
+
+    risk2 <- (risk_tree_class(subtree)-risk)/(leaves-count_leaves(subtree))
+    risk2
+
+    a <- c(a,risk2)
+    a
+  }
+  min_subtree <- cut_tree(trees,inner_nodes[which.min(a)])
+  min_subtree %>% mutate(risk=risk_tree_class(min_subtree)) -> min_subtree
+  min_subtree
+  return(min_subtree)
+}
 
 
 pruning_regression <- function(trees,lambda)
 {
   if (lambda<=0)
   {stop("Lambda must be greater than 0")} # Gewichtung der Blätter muss größer Null sein
-  risk <- risk_tree(trees)
+  risk <- risk_tree_reg(trees)
   trees <- mutate(trees,risk=risk)
   trees <- list(trees)
   trees
   while( count_leaves(trees[[length(trees)]])>1 )
   {
-    trees <- c(trees,list(tree_seq(trees[[length(trees)]])))
+    trees <- c(trees,list(tree_seq_reg(trees[[length(trees)]])))
   }
 
   a <- vector(mode="numeric",length=0L)
@@ -123,3 +166,41 @@ pruning_regression <- function(trees,lambda)
   trees[[which.min(a)]] %>% filter(name %in% c("root","inner node","leaf")) -> prun_tree
   return(prun_tree)
 }
+
+pruning_classification <- function(trees,lambda)
+{
+  if (lambda<=0)
+  {stop("Lambda must be greater than 0")} # Gewichtung der Blätter muss größer Null sein
+  risk <- risk_tree_class(trees)
+  trees <- mutate(trees,risk=risk)
+  trees <- list(trees)
+  trees
+  while( count_leaves(trees[[length(trees)]])>1 )
+  {
+    trees <- c(trees,list(tree_seq_class(trees[[length(trees)]])))
+  }
+
+  a <- vector(mode="numeric",length=0L)
+  for (i in seq_along(trees))
+  {
+    a <- c(a, trees[[i]]$risk[1] + lambda * count_leaves(trees[[i]]))
+  }
+  trees[[which.min(a)]] %>% filter(name %in% c("root","inner node","leaf")) -> prun_tree
+  return(prun_tree)
+}
+
+
+pruning <- function(trees, lambda, type=NULL)
+{
+  if(type == "reg"){
+    return(pruning_regression(trees,lambda))
+  } else if(type == "class"){
+    return(pruning_classification(trees,lambda))
+  } else{
+    stop("Invalid type!")
+  }
+}
+
+
+
+
