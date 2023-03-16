@@ -28,11 +28,11 @@ ui <- fluidPage(
                                          min = 1, max = 500, value = 50)
                     ),
                     
-                    tags$div(title = "Die eingegebene Zahl bestimmt die Tiefe des Baumes. 0 entspricht, dass er die maximale Größe besitzen wird.",
+                    tags$div(title = "Die eingegebene Zahl bestimmt die Tiefe des Baumes. -1 entspricht, dass er die maximale Größe besitzen wird.",
                              numericInput("depth1",
                                           "Maximale Tiefe des Baumes",
-                                          value = 0,
-                                          min = 0)
+                                          value = -1,
+                                          min = -1)
                     ),
                     
                     tags$div(title = "Minimale Anzahl an Trainingsdaten die in einem Blatt sein sollen, damit noch gesplittet wird. Bei n wird noch gesplittet, bei n - 1 nicht mehr.",
@@ -70,7 +70,8 @@ ui <- fluidPage(
                              hidden(
                                numericInput("numberOfBags1",
                                             "Anzahl der Taschen",
-                                            value = 0)
+                                            value = 1,
+                                            min = 1)
                              )
                     ),
                     
@@ -86,6 +87,25 @@ ui <- fluidPage(
                                     actionButton("update1", "Update", icon("rotate"),
                                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
                              ),
+                    
+                    tags$div(title="Ein n-dimensionaler Vektor. Beispieleingabe: 1, 2, 3",
+                             hidden(
+                               textInput("makePrediction1",
+                                         "Vorhersage")
+                             )
+                    ),
+                    
+                    tags$div(title="Die CSV-Datei besitzt m Spalten mit n Zeilen, wobei m die Anzahl der Vorhersagen sind und n die Dimension.",
+                             hidden(
+                               fileInput("fileMakePrediciton1", "CSV-Datei einlesen", accept = ".csv")
+                             )
+                    ),
+                    
+                    hidden(
+                      actionButton("makePredictionButton1", "Berechne Vorhersage", icon("rotate"),
+                                   style="color: #fff; background-color: #337ab7; border-color: #2e6da4")
+                    ),
+                    
                     width = 100,
                     )),
            
@@ -110,11 +130,11 @@ ui <- fluidPage(
                                                "Random Forests - Klassifikationsproblem"),
                                 selected = 1),
                     
-                    tags$div(title = "Die eingegebene Zahl bestimmt die Tiefe des Baumes. 0 entspricht, dass er die maximale Größe besitzen wird.",
+                    tags$div(title = "Die eingegebene Zahl bestimmt die Tiefe des Baumes. -1 entspricht, dass er die maximale Größe besitzen wird.",
                              numericInput("depth2",
                                           "Maximale Tiefe des Baumes",
-                                          value = 0,
-                                          min = 0)
+                                          value = -1,
+                                          min = -1)
                     ),
                     
                     tags$div(title = "Minimale Anzahl an Trainingsdaten die in einem Blatt sein sollen, damit noch gesplittet wird. Bei n wird noch gesplittet, bei n - 1 nicht mehr.",
@@ -152,7 +172,8 @@ ui <- fluidPage(
                              hidden(
                                numericInput("numberOfBags2",
                                             "Anzahl der Taschen",
-                                            value = 0)
+                                            value = 1,
+                                            min = 1)
                              )
                     ),
                     

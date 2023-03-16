@@ -2,14 +2,8 @@ Package: RandomForestsPackage
 Title: Create random forests 
 Version: 0.0.0.9000
 Authors@R: 
-   c( person("Alina", "Telge", , "alina.telge@stud.uni-heidelberg.de", role = c("aut", "cre"), 
-   comment = c(ORCID = "YOUR-ORCID-ID"),
-      person("Dustin", "Wenchel", "wenchel@stud.uni-heidelberg.de", role = c("aut","cre"),
-      comment = c(ORCID = "YOUR-ORCID-ID"),
-      person("Nikolai", "Brooks", , "nikolai.brooks@stud.uni-heidelberg.de", role = c("aut", "cre"), 
-      comment = c(ORCID = "YOUR-ORCID-ID"),
-      person("Patrick", "Schaffrath", , "patrick.schaffrath@stud.uni-heidelberg.de", role = c("aut", "cre"),
-      comment = c(ORCID = "YOUR-ORCID-ID"))
+   person("Alina", "Telge", email="alina.telge@stud.uni-heidelberg.de", role = c("aut", "cre"), 
+   comment = c(ORCID = "YOUR-ORCID-ID"))
 Description:    For regression and classification problems this package allows the user to create
                 CARTS (Classification and regression trees) through different methods. Functions 
                 for the creation of CARTs via the greedy method and optimizing them through cost-complexity

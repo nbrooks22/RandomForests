@@ -2,9 +2,9 @@
 #                         Plot Gieriges-Verfahren Regression
 ####################################################################################
 
-printGreedyCartRegression <- function(data) {
+printRegression <- function(data, plotname) {
   # Plot Daten
-  plot(data$values$x, data$values$y, xlab = "x1", ylab = "y", main="Gieriges Verfahren Regressionsproblem")
+  plot(data$values$x, data$values$y, xlab = "x1", ylab = "y", main=plotname)
 
   # Trennlinien
   trennlinien <- data$tree %>% drop_na() %>% filter(split_point > 0) %>% select(split_point) %>% unique() %>% arrange(split_point)
@@ -20,11 +20,11 @@ printGreedyCartRegression <- function(data) {
   # Max-Min
   minValue <- sort(data$values$x)[1] - 1
   maxValue <- sort(data$values$x, decreasing = T)[1] + 1
-
+  
   # Plot Schätzer
   for (row in 1:nrow(bayesRegelDaten)) {
     value <- bayesRegelDaten$A[[row]][[1]]
-    bayesRegel <- bayesRegelDaten$y[[row]]
+    bayesRegel <- bayesRegelDaten$c_value[[row]]
 
     rightSideBorder <- trennlinien %>% filter(value <= split_point) %>% first() %>% .[[1]]
     leftSideBorder <- trennlinien %>% filter(value >= split_point) %>% last() %>% .[[1]]
@@ -53,11 +53,11 @@ printGreedyCartRegression <- function(data) {
 #                     Plot Gieriges-Verfahren Klassifikation
 ####################################################################################
 
-printGreedyCartClassification <- function(data) {
+printClassification <- function(data, plotname) {
   pal <- palette(c("red", "blue"))
   
   # Plot Daten
-  plot(data$values$x[1], data$values$y[1], xlim=c(0, 1), ylim=c(0, 1), xlab = "x1", ylab = "x2", main="Gieriges Verfahren Klassifikationsproblem", col = pal[data$values$classes[1]])
+  plot(data$values$x[1], data$values$y[1], xlim=c(0, 1), ylim=c(0, 1), xlab = "x1", ylab = "x2", main=plotname, col = pal[data$values$classes[1]])
 
   for (point in 2:nrow(data$values)) {
     points(data$values$x[point], data$values$y[point], col = pal[data$values$classes[point]])
@@ -89,7 +89,6 @@ moveSplit <- function(data) {
   return(data)
 }
 
-
 plotTree <- function(data) {
   data <- moveSplit(data)
   
@@ -118,7 +117,7 @@ plotTree <- function(data) {
           childVector <- c(childVector, paste0("Position: ",
                                                leftChild$node,
                                                "\n", "y = ",
-                                               round(leftChild$y, digits = 2)
+                                               round(leftChild$c_value, digits = 2)
                                                )
                            )
         } else {
@@ -149,7 +148,7 @@ plotTree <- function(data) {
           childVector <- c(childVector, paste0("Position: ",
                                                rightChild$node,
                                                "\n", "y = ",
-                                               round(rightChild$y, digits = 2)
+                                               round(rightChild$c_value, digits = 2)
                                                )
                            )
         } else {
@@ -165,7 +164,7 @@ plotTree <- function(data) {
       }
     }
   }
-
+  
   df <- data.frame(parent = parentVector,
                    child = childVector)
 
