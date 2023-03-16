@@ -1,6 +1,10 @@
 source("PlotFunctions.R")
 source("AdditionalFunctions.R")
 
+# Für Bagging und Randomforests, um anschließend eine Prediction zu machen
+listOfTrees <- list()
+method <- ""
+
 server <- function(input, output, session) {
   # Button-Style
   runjs("$('#file').parent().removeClass('btn-default').addClass('btn-info');")
@@ -20,12 +24,15 @@ server <- function(input, output, session) {
     lambda <- input$lambdaVar1
     # Random Forests
     numberOfDataFromTotal <- input$numberOfDataFromTotal1
+    numberOfCoordinates <- input$numberOfCoordinates1
     # Random Forests und Bagging
     numberOfBags <- input$numberOfBags1
     
     # Falls es zuvor deaktiviert wurde, wird es hier wieder aktiviert
     shinyjs::showElement("caption1")
     shinyjs::showElement("plot")
+    shinyjs::showElement("caption2")
+    shinyjs::showElement("tree")
     
     output$caption1 <- renderText({
       return("Plot")
@@ -88,52 +95,142 @@ server <- function(input, output, session) {
       },
       "Bagging - Regressionsproblem" = {
         data <- create_random_sample_data_reg(1, countElements)
-        data <- RandomForestsPackage::bagging_regression(data, numberOfBags)
+        data <- RandomForestsPackage::bagging(data, numberOfBags, "reg")
+        
+        # Trees abspeichern
+        listOfTrees <<- data$Bagged_Trees
+        method <<- "reg"
         
         # Vorhersagen einlesen
         shinyjs::showElement("makePrediction1")
         shinyjs::showElement("fileMakePrediciton1")
         shinyjs::showElement("makePredictionButton1")
+        
+        # Plot und Tree deaktivieren
+        shinyjs::hideElement("caption1")
+        shinyjs::hideElement("plot")
+        shinyjs::hideElement("caption2")
+        shinyjs::hideElement("tree")
       },
       "Bagging - Klassifikationsproblem" = {
         data <- create_random_sample_data_class(1, countElements)
-        data <- RandomForestsPackage::bagging_classification(data, numberOfBags)
+        data <- RandomForestsPackage::bagging(data, numberOfBags, "class")
+        
+        # Trees abspeichern
+        listOfTrees <<- data$Bagged_Trees
+        method <<- "class"
         
         # Vorhersagen einlesen
         shinyjs::showElement("makePrediction1")
         shinyjs::showElement("fileMakePrediciton1")
+        shinyjs::showElement("makePredictionButton1")
+        
+        # Plot und Tree deaktivieren
+        shinyjs::hideElement("caption1")
+        shinyjs::hideElement("plot")
+        shinyjs::hideElement("caption2")
+        shinyjs::hideElement("tree")
       },
       "Random Forests - Regressionsproblem" = {
         data <- create_random_sample_data_reg(1, countElements)
-        data <- RandomForestsPackage::random_forest_regression(data, numberOfBags, numberOfDataFromTotal, num_leaf = numLeaf, depth = depth, num_split = numSplit, min_num = minNum)
+        result <- RandomForestsPackage::random_forest_regression(data, numberOfBags, numberOfDataFromTotal, numberOfCoordinates, num_leaf = numLeaf, depth = depth, num_split = numSplit, min_num = minNum)
+        
+        resultListOfTree <- list()
+        for (i in 1:length(result)) {
+          resultListOfTree <- append(resultListOfTree, list(result[[i]]$tree))
+        }
+        
+        # Trees abspeichern
+        listOfTrees <<- resultListOfTree
+        method <<- "reg"
+        
+        # Vorhersagen einlesen
+        shinyjs::showElement("makePrediction1")
+        shinyjs::showElement("fileMakePrediciton1")
+        shinyjs::showElement("makePredictionButton1")
+        
+        # Plot und Tree deaktivieren
+        shinyjs::hideElement("caption1")
+        shinyjs::hideElement("plot")
+        shinyjs::hideElement("caption2")
+        shinyjs::hideElement("tree")
       },
       "Random Forests - Klassifikationsproblem" = {
         data <- create_random_sample_data_class(1, countElements)
-        data <- RandomForestsPackage::random_forest_classification(data, numberOfBags, numberOfDataFromTotal, num_leaf = numLeaf, depth = depth, num_split = numSplit, min_num = minNum)
+        result <- RandomForestsPackage::random_forest_classification(data, numberOfBags, numberOfDataFromTotal, numberOfCoordinates, num_leaf = numLeaf, depth = depth, num_split = numSplit, min_num = minNum)
+        
+        resultListOfTree <- list()
+        for (i in 1:length(result)) {
+          resultListOfTree <- append(resultListOfTree, list(result[[i]]$tree))
+        }
+        
+        # Trees abspeichern
+        listOfTrees <<- result
+        method <<- "class"
+        
+        # Vorhersagen einlesen
+        shinyjs::showElement("makePrediction1")
+        shinyjs::showElement("fileMakePrediciton1")
+        shinyjs::showElement("makePredictionButton1")
+        
+        # Plot und Tree deaktivieren
+        shinyjs::hideElement("caption1")
+        shinyjs::hideElement("plot")
+        shinyjs::hideElement("caption2")
+        shinyjs::hideElement("tree")
       }
     )
+  })
+  
+  observeEvent(input$makePredictionButton1, {
+    # Handeingabe
+    handPrediction <- input$makePrediction1
+    # File
+    filePrediction <- input$fileMakePrediciton1
+    
+    if (handPrediction != "" || !is.null(filePrediction)) {
+      # Händische Vorhersage
+      if (handPrediction != "") {
+        prediction <- as.matrix(as.double(unlist(strsplit(handPrediction, ","))), row=1)
+        result <- RandomForestsPackage:::make_prediction(listOfTrees, prediction, method)
+        
+        output$textForPrediction1 <- renderText({ return(paste0("Die Schätzung beträgt ", result)) })
+        shinyjs::show("textForPrediction1")
+      }
+      
+      # File-Vorhersage
+      if (!is.null(filePrediction)) {
+        prediction <- as.matrix(read.csv(filePreditcion$datapath))
+        result <- RandomForestsPackage:::make_prediction(listOfTrees, prediction, method)
+        
+        output$textForPrediction1 <- renderText({ return(paste0("Die Schätzung beträgt ", result)) })
+        shinyjs::show("textForPrediction1")
+      }
+    } else {
+      warning("Es wurde keine Vorhersage eingegeben!")
+    }
   })
   
   
   # Nutzerdaten
   observeEvent(input$update2, {
-    if (is.null(input$file) == FALSE) {
-      file <- input$file
-      # Wahl des Algorithmus
-      algorithm <- input$algorithm2
-      # Gieriges Verfahren
-      countElements <- input$numberOfElements
-      depth <- input$depth2
-      minNum <- input$minNum2
-      numSplit <- input$numSplit2
-      numLeaf <- input$numLeaf2
-      # Pruning
-      lambda <- input$lambdaVar2
-      # Random Forests
-      numberOfDataFromTotal <- input$numberOfDataFromTotal2
-      # Random Forests und Bagging
-      numberOfBags <- input$numberOfBags2
-      
+    file <- input$file
+    # Wahl des Algorithmus
+    algorithm <- input$algorithm2
+    # Gieriges Verfahren
+    countElements <- input$numberOfElements
+    depth <- input$depth2
+    minNum <- input$minNum2
+    numSplit <- input$numSplit2
+    numLeaf <- input$numLeaf2
+    # Pruning
+    lambda <- input$lambdaVar2
+    # Random Forests
+    numberOfDataFromTotal <- input$numberOfDataFromTotal2
+    # Random Forests und Bagging
+    numberOfBags <- input$numberOfBags2
+    
+    if (!is.null(file)) {
       switch (algorithm,
               "Gieriges Verfahren - Regressionsproblem" = {
                 data <- readCSV(file, type = 0)
@@ -195,22 +292,33 @@ server <- function(input, output, session) {
     }
   })
   
-  
   # Zeige Lambda, M oder T bei den Beispielen
   observeEvent(input$algorithm1, {
     algorithm <- input$algorithm1
     
     switch (algorithm,
+            "Gieriges Verfahren - Klassifikationsproblem" = {
+              shinyjs::showElement("unique1")
+            },
             "Pruning - Regressionsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Pruning-Verfahren berücksichtigt:" })
               shinyjs::showElement("helpTextForPruningAndRandomForests1")
               
               shinyjs::showElement("lambdaVar1")
               
+              shinyjs::hideElement("unique1")
+              
               shinyjs::hideElement("numberOfBags1")
               shinyjs::hideElement("numberOfDataFromTotal1")
+              shinyjs::hideElement("numberOfCoordinates1")
+              
+              shinyjs::hideElement("makePrediction1")
+              shinyjs::hideElement("fileMakePrediciton1")
+              shinyjs::hideElement("makePredictionButton1")
             },
             "Pruning - Klassifikationsproblem" = {
+              shinyjs::showElement("unique1")
+              
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Pruning-Verfahren berücksichtigt:" })
               shinyjs::showElement("helpTextForPruningAndRandomForests1")
               
@@ -218,6 +326,11 @@ server <- function(input, output, session) {
               
               shinyjs::hideElement("numberOfBags1")
               shinyjs::hideElement("numberOfDataFromTotal1")
+              shinyjs::hideElement("numberOfCoordinates1")
+              
+              shinyjs::hideElement("makePrediction1")
+              shinyjs::hideElement("fileMakePrediciton1")
+              shinyjs::hideElement("makePredictionButton1")
             },
             "Bagging - Regressionsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Bagging-Verfahren berücksichtigt:" })
@@ -225,8 +338,15 @@ server <- function(input, output, session) {
               
               shinyjs::showElement("numberOfBags1")
               
+              shinyjs::hideElement("unique1")
+              
               shinyjs::hideElement("lambdaVar1")
               shinyjs::hideElement("numberOfDataFromTotal1")
+              shinyjs::hideElement("numberOfCoordinates1")
+              
+              shinyjs::hideElement("makePrediction1")
+              shinyjs::hideElement("fileMakePrediciton1")
+              shinyjs::hideElement("makePredictionButton1")
             },
             "Bagging - Klassifikationsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Bagging-Verfahren berücksichtigt:" })
@@ -234,8 +354,15 @@ server <- function(input, output, session) {
               
               shinyjs::showElement("numberOfBags1")
               
+              shinyjs::hideElement("unique1")
+              
               shinyjs::hideElement("lambdaVar1")
               shinyjs::hideElement("numberOfDataFromTotal1")
+              shinyjs::hideElement("numberOfCoordinates1")
+              
+              shinyjs::hideElement("makePrediction1")
+              shinyjs::hideElement("fileMakePrediciton1")
+              shinyjs::hideElement("makePredictionButton1")
             },
             "Random Forests - Regressionsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Random-Forests-Verfahren berücksichtigt:" })
@@ -243,23 +370,42 @@ server <- function(input, output, session) {
               
               shinyjs::showElement("numberOfBags1")
               shinyjs::showElement("numberOfDataFromTotal1")
+              shinyjs::showElement("numberOfCoordinates1")
+              
+              shinyjs::hideElement("unique1")
               
               shinyjs::hideElement("lambdaVar1")
+              
+              shinyjs::hideElement("makePrediction1")
+              shinyjs::hideElement("fileMakePrediciton1")
+              shinyjs::hideElement("makePredictionButton1")
             },
             "Random Forests - Klassifikationsproblem" = {
+              shinyjs::showElement("unique1")
+              
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Random-Forests-Verfahren berücksichtigt:" })
               shinyjs::showElement("helpTextForPruningAndRandomForests1")
               
               shinyjs::showElement("numberOfBags1")
               shinyjs::showElement("numberOfDataFromTotal1")
+              shinyjs::showElement("numberOfCoordinates1")
               
               shinyjs::hideElement("lambdaVar1")
+              
+              shinyjs::hideElement("makePrediction1")
+              shinyjs::hideElement("fileMakePrediciton1")
+              shinyjs::hideElement("makePredictionButton1")
             },
             {
               shinyjs::hideElement("helpTextForPruningAndRandomForests1")
+              shinyjs::hideElement("unique1")
               shinyjs::hideElement("lambdaVar1")
               shinyjs::hideElement("numberOfBags1")
               shinyjs::hideElement("numberOfDataFromTotal1")
+              shinyjs::hideElement("numberOfCoordinates1")
+              shinyjs::hideElement("makePrediction1")
+              shinyjs::hideElement("fileMakePrediciton1")
+              shinyjs::hideElement("makePredictionButton1")
             }
     )
   })
