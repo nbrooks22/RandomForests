@@ -62,14 +62,12 @@ ui <- fluidPage(
                              )
                     ),
                     
-                    tags$div(title="Gewichtung der Blätter.",
-                             hidden(
-                               textOutput("helpTextForPruningAndRandomForests1"),
-                               numericInput("lambdaVar1",
-                                            "Lambda",
-                                            value = 0,
-                                            min = 0)
-                             )
+                    hidden(
+                      textOutput("helpTextForPruningAndRandomForests1"),
+                      numericInput("lambdaVar1",
+                                   "Lambda",
+                                   value = 0,
+                                   min = 0)
                     ),
                     
                     tags$div(title="Anzahl der Taschen.",
@@ -102,7 +100,7 @@ ui <- fluidPage(
                                                  style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
                              ),
                     
-                    tags$div(title="Ein n-dimensionaler Vektor, wobei jeder Eintrag >= 1 ist. Beispieleingabe: 1,2,3",
+                    tags$div(title="Ein n-dimensionaler Vektor. Beispiel bei Klassifikation: 1,2",
                              hidden(
                                textInput("makePrediction1",
                                          "Schätzung")
@@ -178,14 +176,18 @@ ui <- fluidPage(
                                           min = 0)
                     ),
                     
-                    tags$div(title="Gewichtung der Blätter.",
+                    tags$div(title="Wenn alle Datenpunkte einer Node die selbe Klasse angehören, wir kein Split mehr vorgenommen.",
                              hidden(
-                               textOutput("helpTextForPruningAndRandomForests2"),
-                               numericInput("lambdaVar2",
-                                            "Lambda",
-                                            value = 0,
-                                            min = 0)
+                               checkboxInput("unique2", "Keine Splittung durchführen, wenn Klasse identisch", value = TRUE)
                              )
+                    ),
+                    
+                    hidden(
+                      textOutput("helpTextForPruningAndRandomForests2"),
+                      numericInput("lambdaVar2",
+                                   "Lambda",
+                                   value = 0,
+                                   min = 0)
                     ),
                     
                     tags$div(title="Anzahl der Taschen.",
@@ -205,15 +207,44 @@ ui <- fluidPage(
                              )
                     ),
                     
+                    tags$div(title="Anzahl der Koordinaten.",
+                             hidden(
+                               numericInput("numberOfCoordinates2",
+                                            "Anzahl der Koordinaten",
+                                            value = 0)
+                             )
+                    ),
+                    
                     fluidRow(column(12, align = "center",
                                     actionButton("update2", "Update", icon("rotate"),
-                                                 style="color: #fff; background-color: #337ab7; border-color: #2e6da4")),
-                             width = 100
-                             ),
+                                                 style="color: #fff; background-color: #337ab7; border-color: #2e6da4"))
+                    ),
                     
-                    width = 100
-                    )
-                  )
+                    tags$div(title="Ein n-dimensionaler Vektor. Beispiel bei Klassifikation: 1,2",
+                             hidden(
+                               textInput("makePrediction2",
+                                         "Schätzung")
+                             )
+                    ),
+                    
+                    tags$div(title="Die CSV-Datei besitzt m Spalten mit n Zeilen, wobei m die Anzahl der Vorhersagen sind und n die Dimension.",
+                             hidden(
+                               fileInput("fileMakePrediciton2", "CSV-Datei einlesen", accept = ".csv")
+                             )
+                    ),
+                    
+                    fluidRow(
+                      column(12, align="center",
+                             hidden(
+                               actionButton("makePredictionButton1", "Berechne Schätzung", icon("rotate"),
+                                            style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
+                               textOutput("textForPrediction2")
+                             )
+                      )
+                    ),
+                    
+                    width = 100,
+                  ))
            ),
 
   # Main-Panel
