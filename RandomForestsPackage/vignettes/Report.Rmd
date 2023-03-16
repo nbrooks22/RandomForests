@@ -58,7 +58,7 @@ f <- function(x,y,e){
   Y
 }
 data_class <- tibble(x1 = X1, x2 = X2, y = f(X1,X2,e1))
-data_class2 <- list(x = matrix(c(X1,X2),nrow = 2, byrow = TRUE), y = f(X1,X2,e))
+data_class2 <- list(x = matrix(c(X1,X2),nrow = 2, byrow = TRUE), y = f(X1,X2,e1))
 ```
 
 ## Funktionen
@@ -76,7 +76,8 @@ Für die Entscheidungsregel/die Schätzung eines Wertes gibt es die folgende Fun
 
 Funktionen um einen Entscheidungsbaum zu visualisieren:
 
--   `printGreedyCartRegression()`
+-   `printRegression()`
+-   `printClassification()`
 -   `plotTree()`
 
 ### Erstelle einen Baum mit `greedy_cart()`
@@ -94,6 +95,7 @@ data$tree
 data$values
 data$dim
 ```
+
 
 #### Abbruchbedingungen
 
@@ -120,7 +122,7 @@ greedy_cart(x = x, y = y, data = data_reg, type = "reg", depth = 2)
 Die minimale Anzahl an Trainingsdaten die in einem Knoten sein soll, damit der Knoten weiter aufgeteilt wird, beträgt `num_split`. Bei 10 Trainingsdaten in einem Knoten wird noch weiter aufgeteilt, bei 9 und weniger nicht mehr.
 
 ```{r, eval = FALSE}
-greedy_cart(x = x, y = y, data = data_reg, type = "reg", num_split = 10)
+data_1 <- greedy_cart(x = x, y = y, data = data_reg, type = "reg", num_split = 10)
 ```
 
 ##### `min_num`
@@ -130,6 +132,22 @@ Man teilt einen Knoten nur dann weiter auf, wenn beide darauffolgenden Blätter 
 ```{r, eval = FALSE}
 greedy_cart(x = x, y = y, data = data_reg, type = "reg", min_num = 5)
 ```
+
+
+#### Anzeigen eines Baumes mit `plotTree()`
+Den Entscheidungsbaum kann man mit der Funktion `plotTree()` zeichnen lassen. Hierbei kann das erste Argument eine Umgebung wie man sie bei `greedy_cart()` bekommt sein, oder eine benannte Liste mit einem Baum in Form eines Tibbles und dem Namen tree.
+```{r}
+plotTree(data_1)
+```
+
+#### Plotten des Entscheidungsbaumes mit `printRegression()`
+Man kann sich die entstandene Schätzung eines Regressionsbaumes mit der Funktion `printRegression()` anzeigen lassen. Das erste Argument ist eine Umgebung wie man sie bei `greedy_cart()` bekommt. Das zweite Argument ist der Name des Plots.
+```{r}
+printRegression(data_1, "regression")
+#make_prediction(list(data_1$tree), matrix(0) ,type = "reg")
+```
+
+
 
 Analog funktioniert das gierige Verfahren für Klassifikationsprobleme.
 
@@ -144,62 +162,52 @@ Bei dem Klassifikationsverfahren kommt noch eine weitere Abbruchbedingung hinzu:
 
 Wenn sich nur noch Daten einer Klasse in einem Knoten befinden, wird dieser Knoten nicht weiter aufgeteilt.
 
-```{r, eval = FALSE}
-greedy_cart(x = c(x1,x2), y = y, data = data_class, type = "class", unique = TRUE)
+```{r}
+tree <- greedy_cart(x = c(x1,x2), y = y, data = data_class, type = "class", unique = TRUE)
 ```
 
-### Wähle mittels `pruning()` einen bezüglich des Parameters lambda optmierten Teilbaum zu einem bestehendem CART
+#### Plotten des Entscheidungsbaumes mit `printClassification()` 
+Die Entscheidungsregel eines Klassifikationsbaumes kann man sich ebenfalls anzeigen lassen mit `printClassification()`. Die beiden Argumente sind wie bei `printRegression()`
+```{r}
+printClassification(tree, "classification")
+```
 
-`pruning()` nimmt einen Entscheidungsbaum (CART), einen Parameter `lambda` und einen Typ entgegen. Bei `type` handelt es sich um die Art des Verfahrens. Hierbei steht `type` = "reg" für Regression und `type` ="class" für Klassifikation. Der Parameter `lambda` gewichtet im Term über den optimiert wird die Anzahl der Blätter des jeweiligen Baums.
+### Wähle mittels `pruning()` einen bezüglich des Parameters `lambda` optimierten Teilbaum zu einem bestehendem CART
+
+`pruning()` nimmt einen Entscheidungsbaum (CART), einen Parameter `lambda` und einen Typ entgegen und gibt einen optimalen Teilbaum aus. Bei `type` handelt es sich um die Art des Verfahrens. Hierbei steht `type` = "reg" für Regression und `type` ="class" für Klassifikation. Der Parameter `lambda` gewichtet im Term über den optimiert wird die Anzahl der Blätter des jeweiligen Baums.
 
 ```{r}
-X_prun <- runif(10,0,1)
-e_prun <- rnorm(10,0,0.2)
-Y_prun <- sin(2piX_prun) + e_prun
-data_reg_prun <- tibble(x = X_prun, y = Y_prun)
-data_prun <- greedy_cart(x = x, y = y, data = data_reg_prun, type = "reg")
 lambda <- 1/100
-pruning(data_prun$tree,lambda,type="reg")
+pruning(data$tree,lambda,type="reg")
 ```
 
-### Bestimmung es Parameters `lambda` mittels Cross-Validation `cross_validation`
+### Bestimmung des Parameters `lambda` mittels Cross-Validation `cross_validation`
 
-Die Funktion `cross_validation` nimmt Trainingsdaten `data`, eine Parametermenge `Lambda`, eine natürliche Zahl `m` und den Typ `type` entgegen. Bei Typ handelt es sich wieder um die Unterscheidung zwischen Regression (`type`=reg) und KLassifikation (`type`=class). Die natürliche Zahl `m` gibt mit wievielen Teilmengen eine Partition der Trainingsdaten `data` erstellt werden soll. Der Rückgabewert der Funktion ist die Kompenente des Parametervektors `Lambda`, welche mittels Cross-Validation als bester Schätzer `lambda` für das Pruning-Verfahren geeignet ist. ACHTUNG: Schon für kleines `m` (m \<= 4) und wenige Komponenten in `Lambda` (4 oder weniger Einträge) können hier sehr lange Laufzeiten entstehen. Im Beispiel unten wird mittel `create_random_sample_data_reg(10,10)` ein pseudozufälliges Trainingsdatenset mit 10 Datenpunkten und dem Seed 10 erzeugt.
+Die Funktion `cross_validation` nimmt Trainingsdaten `data`, eine Parametermenge `Lambda`, eine natürliche Zahl `m` und den Typ `type` entgegen. Bei Typ handelt es sich wieder um die Unterscheidung zwischen Regression (`type`=reg) und Klassifikation (`type`=class). Die natürliche Zahl `m` gibt an mit wievielen Teilmengen eine Partition der Trainingsdaten `data` erstellt werden soll. Der Rückgabewert der Funktion ist die Kompenente des Parametervektors `Lambda`, welche mittels Cross-Validation als bester Schätzer `lambda` für das Pruning-Verfahren geeignet ist. ACHTUNG: Schon für kleines `m` (m \<= 4) und wenige Komponenten in `Lambda` (4 oder weniger Einträge) können hier sehr lange Laufzeiten entstehen.
 
 ```{r}
-data <- create_random_sample_data_reg(10,10)
 Lambda <- c(1,2,3)/100
-cross_validation(data, Lambda, m=3, type="reg")
-
+cross_validation(data_reg2, Lambda, m=3, type="reg")
 ```
 
 ### Erstelle Bäume durch Bootstrap Aggregation mit `bagging()`
 
-`bagging()` ist eine Erweiterung auf dem `greedy_cart()`, der mithilfe von Bootstrap Aggregation mehrere Trainingsbäume erstellt um bessere Vorhersagen treffen zu können. Wir wollen bei jedem Aufruf der Funktion `b` verschiedene Bäume erstellen.
+`bagging()` ist eine Erweiterung von `greedy_cart()`, die mithilfe von Bootstrap Aggregation mehrere Trainingsbäume erstellt, um bessere Vorhersagen treffen zu können. Wir wollen bei jedem Aufruf der Funktion `b` = 3 verschiedene Bäume erstellen.
 
-```{r}
-data <- bagging(data = data_reg2, type = "reg")
+```{r, results='hide'}
+data <- bagging(data = data_reg2, b = 3, type = "reg")
 ```
 
-`data` ist eine Liste, wobei `data$Bagged_Trees` die Liste der Entscheidungsbäume (jeweils im Format von den `greedy_cart()` returns) ausgibt, und `data$Prediction` ein Vector von predictions ist. Die Anzahl von ausgegebenen Predictions ist gleich der Anzahl von eingegebenen Schätzdaten.
+`data` ist eine Liste, wobei `data$Bagged_Trees` die Liste der Entscheidungsbäume (jeweils im Format von den `greedy_cart()` returns) ausgibt, und `data$Prediction` ein Vektor von Schätzungen ist. Die Anzahl von ausgegebenen Schätzungen ist gleich der Anzahl von eingegebenen Schätzdaten.
 
 ```{r}
 data$Bagged_Trees
 data$Prediction
 ```
 
-#### `b`
-
-Die Anzahl von Bags die erstellt werden soll. Der default wert ist 5.
-
-```{r}
-data <- bagging(data = data_reg2, b = 3, type = "reg")
-data$Bagged_Trees
-```
 
 #### `pred_val`
-
-Eine Matrix mit den werten die man schätzen will, wo jede spalte einen Vektor von gleicher Dimension wie die x-werte der Eingangsdaten darstellt (in diesem Fall testen wir 3 verschiedene eindimensionale Werte).
+Wenn man nun gleichzeitig Werte anhand der Beobachtungen schätzen will, kann man eine Matrix als Argument übergeben, wobei jede Spalte einen Vektor von gleicher Dimension wie die x-Werte der Eingangsdaten darstellt (in diesem Fall wollen wir eine Schätzung für 3 verschiedene eindimensionale Werte).
 
 ```{r}
 pred_matrix <- matrix(c(0.3, 0.5, 1), ncol = 3)
@@ -207,52 +215,32 @@ data <- bagging(data = data_reg2, type = "reg", pred_val = pred_matrix)
 data$Prediction
 ```
 
-Die Abbruchbedingungen zu jedem Baum sind von den default werten von `greedy_cart()` genommen.
+Analog funktioniert das bagging Verfahren für Klassifikationsprobleme.
 
-Analog funktioniert das gierige Verfahren für Klassifikationsprobleme.
-
-```{r}
-data <- bagging(data = data_class2, b = 8, type = "class")
+```{r, eval = FALSE}
+bagging(data = data_class2, b = 8, type = "class")
 ```
 
 ### `random_forest()`
 
-`random_forest()` ist eine Verallgemeinerung des `bagging` Algorithmus. Wir wollen in jedem Iterationsschritt `m` = 1 Koordinaten benutzen, insgesamt `B` = 5 Bäume erstellen und für jeden Baum `A` = 50 zufällig ausgewählte Daten aus den originalen Daten verwenden. Die Abbruchbedingungen sind die gleichen wie bei `greedy_cart()`. Hier wird solange weitergemacht, bis der Baum `num_leaf` = 25 Blätter hat.
+`random_forest()` ist eine Verallgemeinerung des `bagging` Algorithmus. Wir wollen in jedem Iterationsschritt `m` = 1 Koordinaten benutzen, insgesamt `B` = 5 Bäume erstellen und für jeden Baum `A` = 25 zufällig ausgewählte Daten aus den originalen Daten verwenden. Die Abbruchbedingungen sind die gleichen wie bei `greedy_cart()`. Hier wird solange weitergemacht, bis der Baum `num_leaf` = 15 Blätter hat.
 
 ```{r}
-data <- random_forest(x = c(x1,x2), y = y, data = data_class, type = "class", B = 5, A = 50, m = 1, num_leaf = 25)
+random_forest(x = c(x1,x2), y = y, data = data_class, type = "class", B = 5, A = 25, m = 1, num_leaf = 15)
 ```
 
-Die verschiedenen Bäume sehen wie folgt aus:
-
-```{r, echo = FALSE}
-for(i in seq_along(data)) print(data[[i]]$tree, n = 5)
-```
 
 ### `make_prediction()`
 
-`make_prediction()` ist eine Funktion die erlaubt, unsere erstellten Bäume auch zu benutzen. Wir wollen den oder die Bäume durchlaufen, und jeweils schauen bei welchem c_value wir landen.
-
-#### `tree_list`
-
-Eine Liste von Environments, so wie sie von z.b. `greedy_cart()`, `bagging()` oder ähnlichem generiert werden. ACHTUNG: Muss im List() format übergeben werden, auch wenn es nur ein Baum hat
+`make_prediction()` ist eine Funktion die uns erlaubt, unsere erstellten Bäume auch zu benutzen. Wir wollen nun eine Schätzung von Werten anhand der Entscheidungsbäume finden. Es wird als erstes Argument eine Liste von Bäumen in Tibbleform übergeben. ACHTUNG: Muss im list() Format übergeben werden, auch wenn es nur ein Baum ist. Das zweite Argument ist eine Matrix mit den Werten die man schätzen will, wobei jede Spalte einen Vektor von gleicher Dimension wie die x-Werte der Eingangsdaten darstellt (in diesem Fall testen wir 4 verschiedene eindimensionale Werte). Das Argument `type` ist wieder entweder `type` = "reg" oder `type` = "class", was auch immer für einen Typ die entsprechenden Bäume haben.
 
 ```{r}
 treelist <- bagging(data = data_reg2, b = 3, type = "reg")
+xlist <- matrix(c(0, 0.25, 0.5, 1), nrow = 1)
+make_prediction(treelist$Bagged_Trees, xlist, type = "reg")
 ```
 
-#### `x_list`
 
-Eine Matrix mit den werten die man schätzen will, wo jede spalte einen Vektor von gleicher Dimension wie die x-werte der Eingangsdaten darstellt (in diesem Fall testen wir 4 verschiedene eindimensionale Werte).
 
-```{r}
-xlist <- matrix(c(0.1, 0.4, 0.6, 0.2), ncol = 2)
-```
 
-#### `type`
 
-Entweder `type` = "reg" oder `type` = "class", was auch immer die entsprechenden Bäume für Daten haben.
-
-```{r}
-make_prediction(treelist$Bagged_Trees, xlist, "reg")
-```
