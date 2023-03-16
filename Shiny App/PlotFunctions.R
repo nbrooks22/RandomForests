@@ -25,9 +25,24 @@ printRegression <- function(data, plotname) {
   for (row in 1:nrow(bayesRegelDaten)) {
     value <- bayesRegelDaten$A[[row]][[1]]
     bayesRegel <- bayesRegelDaten$c_value[[row]]
-
-    rightSideBorder <- trennlinien %>% filter(value <= split_point) %>% first() %>% .[[1]]
-    leftSideBorder <- trennlinien %>% filter(value >= split_point) %>% last() %>% .[[1]]
+    
+    rightSideBorder <- tryCatch( 
+      {
+        trennlinien %>% filter(value <= split_point) %>% first() %>% .[[1]]
+      },
+      error = function(e) {
+        NA
+      }
+    )
+    
+    leftSideBorder <- tryCatch( 
+      {
+        trennlinien %>% filter(value >= split_point) %>% last() %>% .[[1]]
+      },
+      error = function(e) {
+        NA
+      }
+    )
 
     # Es existiert keine linke Trennlinie
     if (is.na(leftSideBorder)) {
