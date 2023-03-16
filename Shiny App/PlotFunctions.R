@@ -20,11 +20,11 @@ printRegression <- function(data, plotname) {
   # Max-Min
   minValue <- sort(data$values$x)[1] - 1
   maxValue <- sort(data$values$x, decreasing = T)[1] + 1
-
+  
   # Plot Schätzer
   for (row in 1:nrow(bayesRegelDaten)) {
     value <- bayesRegelDaten$A[[row]][[1]]
-    bayesRegel <- bayesRegelDaten$y[[row]]
+    bayesRegel <- bayesRegelDaten$c_value[[row]]
 
     rightSideBorder <- trennlinien %>% filter(value <= split_point) %>% first() %>% .[[1]]
     leftSideBorder <- trennlinien %>% filter(value >= split_point) %>% last() %>% .[[1]]
@@ -89,7 +89,6 @@ moveSplit <- function(data) {
   return(data)
 }
 
-
 plotTree <- function(data) {
   data <- moveSplit(data)
   
@@ -118,7 +117,7 @@ plotTree <- function(data) {
           childVector <- c(childVector, paste0("Position: ",
                                                leftChild$node,
                                                "\n", "y = ",
-                                               round(leftChild$y, digits = 2)
+                                               round(leftChild$c_value, digits = 2)
                                                )
                            )
         } else {
@@ -149,7 +148,7 @@ plotTree <- function(data) {
           childVector <- c(childVector, paste0("Position: ",
                                                rightChild$node,
                                                "\n", "y = ",
-                                               round(rightChild$y, digits = 2)
+                                               round(rightChild$c_value, digits = 2)
                                                )
                            )
         } else {
@@ -165,7 +164,7 @@ plotTree <- function(data) {
       }
     }
   }
-
+  
   df <- data.frame(parent = parentVector,
                    child = childVector)
 

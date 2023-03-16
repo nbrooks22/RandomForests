@@ -63,8 +63,7 @@ server <- function(input, output, session) {
       "Pruning - Regressionsproblem" = {
         data <- create_random_sample_data_reg(1, countElements)
         data <- RandomForestsPackage::greedy_cart_regression(data, numLeaf, depth, numSplit, minNum)
-        data$tree <- RandomForestsPackage:::pruning_regression(data$tree, lambda)
-        data$tree[data$tree$name == "leaf", ]$y <- data$tree %>% filter(name == "leaf") %>% .$c_value
+        data$tree <- RandomForestsPackage:::pruning(data$tree, lambda, type = "reg")
         
         output$plot <- renderPlot({
           printRegression(data, "Pruning - Regressionsproblem")
@@ -77,6 +76,15 @@ server <- function(input, output, session) {
       "Pruning - Klassifikationsproblem" = {
         data <- create_random_sample_data_class(1, countElements)
         data <- RandomForestsPackage::greedy_cart_classification(data, numLeaf, depth, numSplit, minNum)
+        data$tree <- RandomForestsPackage:::pruning(data$tree, lambda, type = "class")
+        
+        output$plot <- renderPlot({
+          printClassification(data, "Pruning - Klassifikationsproblem")
+        })
+        
+        output$tree <- renderGrViz({
+          plotTree(data)
+        })
       },
       "Bagging - Regressionsproblem" = {
         data <- create_random_sample_data_reg(1, countElements)

@@ -19,5 +19,3 @@ shinyApp(ui, server,
                 envir = .GlobalEnv)
            })
          })
-
-# Pruning-Klassifikation kommt noch
