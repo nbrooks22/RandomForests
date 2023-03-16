@@ -73,7 +73,7 @@ find_leaf1 <- function(tree){
 #'
 #'
 #'
-#' @param tree_list A list containing any number >=1 environments (trees) \cr as produced by `greedy_cart()`, `pruning()`, `bagging()`
+#' @param tree_list A list containing any number >=1 of trees (in tibble form) \cr as produced by `greedy_cart()`, `pruning()`, `bagging()`
 #' or `random_forest()`
 #' @param x_list A matrix of values to be predicted, where each column of `x_list` corresponds \cr to one datapoint.
 #' \cr The number of rows corresponds to the dimension of the x values
@@ -95,9 +95,6 @@ make_prediction <- function(tree_list, x_list, type = NULL){
   }
   if(is.null(type)){
     stop("Please set the type to either `reg` or `class`!")
-  }
-  if(as_integer(length(x_list[,1])) != as_integer(tree_list[[1]]$dims)){
-    stop("The dimensions of the prediction are not equal to the dimensions of the given data x-values!")
   }
 
   y_s <- c()

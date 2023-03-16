@@ -8,7 +8,7 @@ Make a Prediction of a datapoint or set of datapoints on a tree or set of trees.
 make_prediction(tree_list, x_list, type = NULL)
 }
 \arguments{
-\item{tree_list}{A list containing any number >=1 environments (trees) \cr as produced by \code{greedy_cart()}, \code{pruning()}, \code{bagging()}
+\item{tree_list}{A list containing any number >=1 of trees (in tibble form) \cr as produced by \code{greedy_cart()}, \code{pruning()}, \code{bagging()}
 or \code{random_forest()}}
 
 \item{x_list}{A matrix of values to be predicted, where each column of \code{x_list} corresponds \cr to one datapoint.

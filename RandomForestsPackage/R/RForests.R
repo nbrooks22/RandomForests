@@ -82,7 +82,7 @@ random_forest_regression <- function(data, B, A = NULL, m = 0, num_leaf = NULL, 
     # wenn d = 1: data$x[,sam] Problem, da new_data2 keine matrix mehr ist
     # Lösung: drop = FALSE
 
-    tree[[i]] <- greedy_cart_regression(new_data, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m)
+    tree[[i]] <- greedy_cart_regression(new_data, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m)$tree
 
   }
   tree
@@ -111,7 +111,7 @@ random_forest_regression <- function(data, B, A = NULL, m = 0, num_leaf = NULL, 
 #' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
 #' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
 #' @param unique if `unique` is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
-#' \cr the default value is FALSE                       
+#' \cr the default value is FALSE
 #'
 #' @return a list of `B` trees (description for a tree see ?greedy_cart)
 #' @export
@@ -187,7 +187,7 @@ random_forest_classification <- function(data, B, A = NULL, m = 0, num_leaf = NU
     # wenn d = 1: data$x[,sam] Problem, da new_data2 keine matrix mehr ist
     # Lösung: drop = FALSE
 
-    tree[[i]] <- greedy_cart_classification(new_data, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m, unique = unique)
+    tree[[i]] <- greedy_cart_classification(new_data, num_leaf = num_leaf, depth = depth, num_split = num_split, min_num = min_num, m = m, unique = unique)$tree
 
   }
   tree
@@ -215,7 +215,7 @@ random_forest_classification <- function(data, B, A = NULL, m = 0, num_leaf = NU
 #' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
 #' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
 #' @param unique parameter for classification data: if `unique` is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
-#' \cr the default value is FALSE                      
+#' \cr the default value is FALSE
 #'
 #' @return a list of `B` trees (description for a tree see ?greedy_cart)
 #'
