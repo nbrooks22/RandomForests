@@ -7,10 +7,10 @@
 random_forest_regression(
   data,
   B,
-  A,
-  m,
+  A = NULL,
+  m = 0,
   num_leaf = NULL,
-  depth = 0,
+  depth = NULL,
   num_split = 2,
   min_num = 1
 )

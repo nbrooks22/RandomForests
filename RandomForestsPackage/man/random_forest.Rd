@@ -9,11 +9,11 @@ random_forest(
   y,
   data,
   B,
-  A,
-  m,
+  A = NULL,
+  m = 0,
   type = NULL,
   num_leaf = NULL,
-  depth = 0,
+  depth = NULL,
   num_split = 2,
   min_num = 1
 )

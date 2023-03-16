@@ -25,7 +25,7 @@ bagging <- function(data, b = 5, type = NULL, pred_val = NULL){
   }
 
   if(type == "reg"){
-    if(class(data) != class(list())){
+    if(any(class(data) != class(list()))){
       stop("Please input data in the correct format - see ?bagging_regression !")
     }
     if (b == 0){
@@ -74,7 +74,7 @@ bagging <- function(data, b = 5, type = NULL, pred_val = NULL){
     }
   }
   if(type == "class"){
-    if(class(data) != class(list())){
+    if(any(class(data) != class(list()))){
       stop("Please input data in the correct format - see ?bagging_regression !")
     }
     if (b == 0){

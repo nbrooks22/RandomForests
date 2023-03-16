@@ -10,7 +10,7 @@ greedy_cart(
   data,
   type = NULL,
   num_leaf = NULL,
-  depth = 0,
+  depth = NULL,
   num_split = 2,
   min_num = 1,
   m = 0

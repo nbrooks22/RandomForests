@@ -69,7 +69,7 @@ find_leaf1 <- function(tree){
 
 #RunDataThroughList of Trees
 make_prediction <- function(tree_list, x_list, type = NULL){
-  if(class(tree_list) != class(list())){
+  if(any(class(tree_list) != class(list()))){
     stop("The Tree you are making a prediction for must be in a List!")
   }
   if(any(class(x_list) != class(matrix()))){
@@ -78,6 +78,10 @@ make_prediction <- function(tree_list, x_list, type = NULL){
   if(is.null(type)){
     stop("Please set the type to either `reg` or `class`!")
   }
+  if(as_integer(length(x_list[,1])) != as_integer(tree_list[[1]]$dims)){
+    stop("The dimensions of the prediction are not equal to the dimensions of the given data x-values!")
+  }
+
   y_s <- c()
 
 

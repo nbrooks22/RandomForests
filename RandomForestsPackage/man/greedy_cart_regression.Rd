@@ -6,8 +6,8 @@
 \usage{
 greedy_cart_regression(
   data,
-  num_leaf = 0,
-  depth = 0,
+  num_leaf = NULL,
+  depth = NULL,
   num_split = 2,
   min_num = 1,
   m = 0
