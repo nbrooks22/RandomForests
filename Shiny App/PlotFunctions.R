@@ -16,28 +16,28 @@ printRegression <- function(data, plotname) {
 
   # Schätzer
   bayesRegelDaten <- data$tree %>% filter(name == "leaf")
-  
+
   # Max-Min
   minValue <- sort(data$values$x)[1] - 1
   maxValue <- sort(data$values$x, decreasing = T)[1] + 1
-  
+
   # Plot Schätzer
   for (row in 1:nrow(bayesRegelDaten)) {
     value <- bayesRegelDaten$A[[row]][[1]]
     bayesRegel <- bayesRegelDaten$c_value[[row]]
-    
-    rightSideBorder <- tryCatch( 
+
+    rightSideBorder <- tryCatch(
       {
-        trennlinien %>% filter(value <= split_point) %>% first() %>% .[[1]]
+        trennlinien %>% filter(value <= split_point) %>% min()
       },
       error = function(e) {
         NA
       }
     )
-    
-    leftSideBorder <- tryCatch( 
+
+    leftSideBorder <- tryCatch(
       {
-        trennlinien %>% filter(value >= split_point) %>% last() %>% .[[1]]
+        trennlinien %>% filter(value >= split_point) %>% max()
       },
       error = function(e) {
         NA
@@ -59,7 +59,7 @@ printRegression <- function(data, plotname) {
       segments(leftSideBorder, bayesRegel, rightSideBorder, bayesRegel)
     }
   }
-  
+
   # Legende
   legend("topright", legend=c("Trainingsdaten", "Schätzer", "Trennlinien"), pch=c(1, NA, NA), lty=c(NA, 1, 2), cex=1.5)
 }
@@ -70,14 +70,14 @@ printRegression <- function(data, plotname) {
 
 printClassification <- function(data, plotname) {
   pal <- palette(c("red", "blue"))
-  
+
   # Plot Daten
   plot(data$values$x[1], data$values$y[1], xlim=c(0, 1), ylim=c(0, 1), xlab = "x1", ylab = "x2", main=plotname, col = pal[data$values$classes[1]])
 
   for (point in 2:nrow(data$values)) {
     points(data$values$x[point], data$values$y[point], col = pal[data$values$classes[point]])
   }
-  
+
   # Legende
   legend("topright", legend=c("Trennlinien", "Schätzung Klasse 1", "Schätzung Klasse 2"), col=c("black", pal[1], pal[2]), pch=c(NA, 1, 1), lty=c(1, NA, NA), cex=1.5)
 }
@@ -90,26 +90,26 @@ moveSplit <- function(data) {
   for (row in 1:nrow(data$tree)) {
     currentNode <- data$tree[row, ]
     leftChild <- data$tree %>% filter(node == currentNode$node * 2)
-    
+
     # Überprüfe, ob linkes Kind existiert
     if (nrow(leftChild) > 0) {
       data$tree[row, ]$split_point <- leftChild$split_point
       data$tree[row, ]$split_index <- leftChild$split_index
     }
   }
-  
-  data$tree[data$tree$name == "leaf", ]$split_point <- NA 
+
+  data$tree[data$tree$name == "leaf", ]$split_point <- NA
   data$tree[data$tree$name == "leaf", ]$split_index <- NA
-  
+
   return(data)
 }
 
 plotTree <- function(data) {
   data <- moveSplit(data)
-  
+
   parentVector <- c()
   childVector <- c()
-  
+
   for (row in 1:nrow(data$tree)) {
     currentNode <- data$tree[row, ]
     if (nrow(currentNode) > 0) {
@@ -179,7 +179,7 @@ plotTree <- function(data) {
       }
     }
   }
-  
+
   df <- data.frame(parent = parentVector,
                    child = childVector)
 
