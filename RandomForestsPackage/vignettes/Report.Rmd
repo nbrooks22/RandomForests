@@ -121,7 +121,23 @@ val$tree
 
 ### Wähle mittels `pruning()` einen bezüglich des Parameters lambda optmierten Teilbaum zu einem bestehendem CART
 `pruning()` nimmt einen Entscheidungsbaum (CART), einen Parameter `lambda` und einen Typ entgegen. Bei `type` handelt es sich um die Art des Verfahrens. Hierbei steht
-`type` = "reg" für Regression und `type` ="class" für Klassifikation. 
+`type` = "reg" für Regression und `type` ="class" für Klassifikation. Der Parameter `lambda` gewichtet im Term über den optimiert wird die Anzahl der Blätter des jeweiligen Baums. 
+``` {r}
+data <- greedy_cart_regression(create_random_sample_data_reg(10,10))
+lambda <- 1/100
+pruning(data$tree,lambda,type="reg")
+```
+
+### Bestimmung es Parameters `lambda` mittels Cross-Validation `cross_validation`
+Die Funktion `cross_validation` nimmt Trainingsdaten `data`, eine Parametermenge `Lambda`, eine natürliche Zahl `m` und den Typ `type` entgegen. Bei Typ handelt es sich wieder um die Unterscheidung zwischen Regression (`type`=reg) und KLassifikation (`type`=class). Die natürliche Zahl `m` gibt mit wievielen Teilmengen eine Partition der Trainingsdaten `data` erstellt werden soll. Der Rückgabewert der Funktion ist die Kompenente des Parametervektors `Lambda`, welche mittels Cross-Validation als bester Schätzer `lambda` für das Pruning-Verfahren geeignet ist. 
+ACHTUNG: Schon für kleines `m` (m <= 4) und wenige Komponenten in `Lambda` (4 oder weniger Einträge) können hier sehr lange Laufzeiten entstehen. 
+
+``` {r}
+data <- create_random_sample_data_reg(10,10)
+Lambda <- c(1,2,3)/100
+cross_validation(data, Lambda, m=3, type="reg")
+
+```
 
 ### `bagging()`
 
