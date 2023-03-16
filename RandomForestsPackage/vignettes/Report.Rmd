@@ -60,7 +60,7 @@ data_class <- tibble(x1 = X1, x2 = X2, y = f(X1,X2,e1))
 Es gibt verschiedene Funktionen um Entscheidungsbäume zu erstellen:
 
 * `greedy_cart()` erstellt einen Baum mittels gierigem Verfahren
-* `pruning()`
+* `pruning()` gibt für einen bereits erstellten Baum (CART) einen Teilbaum zurück. Dieser ist bezüglich des Risikos und eines Parameters lambda, welche die Blattanzahl gewichtet, optimiert. 
 * `bagging()`
 * `random_forest()` erstellt einen Random Forest
 
