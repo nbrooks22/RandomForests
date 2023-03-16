@@ -14,7 +14,7 @@ shinyApp(ui, server,
          onStart = function() {
            onStop(function() {
              rm("server", "ui",
-                "printRegression", "printClassification", "plotTree", "moveSplit",
+                "printRegression", "printClassification", "plotLinesColor", "plotTree", "moveSplit",
                 "readCSV", "create_random_sample_data_reg", "create_random_sample_data_class",
                 "listOfTrees", "method",
                 envir = .GlobalEnv)

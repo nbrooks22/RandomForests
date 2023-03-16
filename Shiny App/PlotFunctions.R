@@ -53,18 +53,119 @@ printRegression <- function(data, plotname) {
 #                     Plot Gieriges-Verfahren Klassifikation
 ####################################################################################
 
+plotLinesColor <- function(data, currentNodePosition = 1, leftBelowPoint = NULL, rightAbovePoint = NULL, colorpal) {
+  currentNode <- data$tree %>% filter(node == currentNodePosition)
+
+  if (nrow(currentNode) > 0 && currentNode$name != "leaf") {
+    # Klasse 1
+    if (currentNode$split_index == 1) {
+      if (currentNodePosition == 1) {
+        # Current Node ist Root-Node
+        leftBelowPoint <- c()
+        rightAbovePoint <- c()
+        
+        # Finde Zone
+        for (point in 1:length(data$tree$A[[1]])) {
+          # Setze Standardpunkt
+          if (is.null(leftBelowPoint)) {leftBelowPoint <- data$tree$A[[1]][[point]]}
+          if (is.null(rightAbovePoint)) {rightAbovePoint <- data$tree$A[[1]][[point]]}
+          
+          # Vergleiche ob der linke untere Punkt wirklich der letzte ist
+          if (data$tree$A[[1]][[point]][1] <= leftBelowPoint[1]) {
+            leftBelowPoint[1] <- data$tree$A[[1]][[point]][1]
+          }
+          
+          if (data$tree$A[[1]][[point]][2] <= leftBelowPoint[2]) {
+            leftBelowPoint[2] <- data$tree$A[[1]][[point]][2]
+          }
+          
+          # Vergleiche ob der rechte obere Punkt wirklich der letzte ist
+          if (data$tree$A[[1]][[point]][1] >= rightAbovePoint[1]) {
+            rightAbovePoint[1] <- data$tree$A[[1]][[point]][1]
+          }
+          
+          if (data$tree$A[[1]][[point]][2] >= rightAbovePoint[2]) {
+            rightAbovePoint[2] <- data$tree$A[[1]][[point]][2]
+          }
+        }
+        
+        # Zeichne erste Linie
+        segments(currentNode$split_point, leftBelowPoint[2], currentNode$split_point, rightAbovePoint[2])
+      } else {
+        segments(currentNode$split_point, leftBelowPoint[2], currentNode$split_point, rightAbovePoint[2])
+      }
+      # Linkes Kind
+      plotLinesColor(data, currentNodePosition * 2, leftBelowPoint, c(currentNode$split_point, rightAbovePoint[2]), colorpal)
+      # Rechtes Kind
+      plotLinesColor(data, currentNodePosition * 2 + 1, c(currentNode$split_point, leftBelowPoint[2]), rightAbovePoint, colorpal)
+    }
+    
+    # Klasse 2
+    if (currentNode$split_index == 2) {
+      if (currentNodePosition == 1) {
+        # Current Node ist Root-Node
+        leftBelowPoint <- c()
+        rightAbovePoint <- c()
+        
+        # Finde Zone
+        for (point in 1:length(data$tree$A[[1]])) {
+          # Setze Standardpunkt
+          if (is.null(leftBelowPoint)) {leftBelowPoint <- data$tree$A[[1]][[point]]}
+          if (is.null(rightAbovePoint)) {rightAbovePoint <- data$tree$A[[1]][[point]]}
+          
+          # Vergleiche ob der linke untere Punkt wirklich der letzte ist
+          if (data$tree$A[[1]][[point]][1] <= leftBelowPoint[1]) {
+            leftBelowPoint[1] <- data$tree$A[[1]][[point]][1]
+          }
+          
+          if (data$tree$A[[1]][[point]][2] <= leftBelowPoint[2]) {
+            leftBelowPoint[2] <- data$tree$A[[1]][[point]][2]
+          }
+          
+          # Vergleiche ob der rechte obere Punkt wirklich der letzte ist
+          if (data$tree$A[[1]][[point]][1] >= rightAbovePoint[1]) {
+            rightAbovePoint[1] <- data$tree$A[[1]][[point]][1]
+          }
+          
+          if (data$tree$A[[1]][[point]][2] >= rightAbovePoint[2]) {
+            rightAbovePoint[2] <- data$tree$A[[1]][[point]][2]
+          }
+        }
+        
+        # Zeichne erste Linie
+        segments(leftBelowPoint[1], currentNode$split_point, rightAbovePoint[1], currentNode$split_point)
+      } else {
+        segments(leftBelowPoint[1], currentNode$split_point, rightAbovePoint[1], currentNode$split_point)
+      }
+      # Linkes Kind
+      plotLinesColor(data, currentNodePosition * 2, leftBelowPoint, c(rightAbovePoint[1], currentNode$split_point), colorpal)
+      # Rechtes Kind
+      plotLinesColor(data, currentNodePosition * 2 + 1, c(leftBelowPoint[1], currentNode$split_point), rightAbovePoint, colorpal)
+    }
+  }
+  
+  if (currentNode$name == "leaf") {
+    rect(leftBelowPoint[1], leftBelowPoint[2], rightAbovePoint[1], rightAbovePoint[2], col = colorpal[currentNode$c_value])
+  }
+  
+}
+
 printClassification <- function(data, plotname) {
-  pal <- palette(c("red", "blue"))
+  color <- c("red", "blue")
 
   # Plot Daten
-  plot(data$values$x[1], data$values$y[1], xlim=c(0, 1), ylim=c(0, 1), xlab = "x1", ylab = "x2", main=plotname, col = pal[data$values$classes[1]])
+  plot(data$values$x[1], data$values$y[1], xlim=c(0, 1), ylim=c(0, 1), xlab = "x1", ylab = "x2", main=plotname, col = color[data$values$classes[1]])
 
   for (point in 2:nrow(data$values)) {
-    points(data$values$x[point], data$values$y[point], col = pal[data$values$classes[point]])
+    points(data$values$x[point], data$values$y[point], col = color[data$values$classes[point]])
   }
+  
+  # Plot Linien und Color
+  moveSplit(data)
+  plotLinesColor(data, colorpal = c(rgb(1.0, 0, 0, alpha=0.4), rgb(0, 0, 1.0, alpha=0.4)))
 
   # Legende
-  legend("topright", legend=c("Trennlinien", "Schätzung Klasse 1", "Schätzung Klasse 2"), col=c("black", pal[1], pal[2]), pch=c(NA, 1, 1), lty=c(1, NA, NA), cex=1.5)
+  legend("topright", legend=c("Trennlinien", "Schätzung Klasse 1", "Schätzung Klasse 2"), col=c("black", color[1], color[2]), pch=c(NA, 1, 1), lty=c(1, NA, NA), cex=1.5)
 }
 
 ####################################################################################

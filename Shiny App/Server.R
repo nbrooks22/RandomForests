@@ -11,7 +11,6 @@ server <- function(input, output, session) {
   runjs("$('#fileMakePrediciton1').parent().removeClass('btn-default').addClass('btn-info');")
   
   
-  
   # Beispiele
   observeEvent(input$update1, {
     # Wahl des Algorithmus
@@ -221,8 +220,6 @@ server <- function(input, output, session) {
       warning("Es wurde keine Vorhersage eingegeben!")
     }
   })
-  
-  
   
   
   # Nutzerdaten
@@ -495,7 +492,6 @@ server <- function(input, output, session) {
   })
   
   
-  
   # Zeige Lambda, M ect. bei den Beispielen
   observeEvent(input$algorithm1, {
     algorithm1 <- input$algorithm1
@@ -515,6 +511,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction1")
               shinyjs::hideElement("fileMakePrediciton1")
               shinyjs::hideElement("makePredictionButton1")
+              shinyjs::hideElement("textForPrediction1")
             },
             "Pruning - Regressionsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Pruning-Verfahren berücksichtigt:" })
@@ -531,6 +528,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction1")
               shinyjs::hideElement("fileMakePrediciton1")
               shinyjs::hideElement("makePredictionButton1")
+              shinyjs::hideElement("textForPrediction1")
             },
             "Pruning - Klassifikationsproblem" = {
               shinyjs::showElement("unique1")
@@ -547,6 +545,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction1")
               shinyjs::hideElement("fileMakePrediciton1")
               shinyjs::hideElement("makePredictionButton1")
+              shinyjs::hideElement("textForPrediction1")
             },
             "Bagging - Regressionsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Bagging-Verfahren berücksichtigt:" })
@@ -563,6 +562,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction1")
               shinyjs::hideElement("fileMakePrediciton1")
               shinyjs::hideElement("makePredictionButton1")
+              shinyjs::hideElement("textForPrediction1")
             },
             "Bagging - Klassifikationsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Bagging-Verfahren berücksichtigt:" })
@@ -579,6 +579,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction1")
               shinyjs::hideElement("fileMakePrediciton1")
               shinyjs::hideElement("makePredictionButton1")
+              shinyjs::hideElement("textForPrediction1")
             },
             "Random Forests - Regressionsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Random-Forests-Verfahren berücksichtigt:" })
@@ -595,6 +596,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction1")
               shinyjs::hideElement("fileMakePrediciton1")
               shinyjs::hideElement("makePredictionButton1")
+              shinyjs::hideElement("textForPrediction1")
             },
             "Random Forests - Klassifikationsproblem" = {
               shinyjs::showElement("unique1")
@@ -611,6 +613,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction1")
               shinyjs::hideElement("fileMakePrediciton1")
               shinyjs::hideElement("makePredictionButton1")
+              shinyjs::hideElement("textForPrediction1")
             },
             {
               shinyjs::hideElement("helpTextForPruningAndRandomForests1")
@@ -622,6 +625,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction1")
               shinyjs::hideElement("fileMakePrediciton1")
               shinyjs::hideElement("makePredictionButton1")
+              shinyjs::hideElement("textForPrediction1")
             }
     )
   })
@@ -644,6 +648,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction2")
               shinyjs::hideElement("fileMakePrediciton2")
               shinyjs::hideElement("makePredictionButton2")
+              shinyjs::hideElement("textForPrediction2")
             },
             "Pruning - Regressionsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Pruning-Verfahren berücksichtigt:" })
@@ -660,6 +665,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction2")
               shinyjs::hideElement("fileMakePrediciton2")
               shinyjs::hideElement("makePredictionButton2")
+              shinyjs::hideElement("textForPrediction2")
             },
             "Pruning - Klassifikationsproblem" = {
               shinyjs::showElement("unique2")
@@ -676,6 +682,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction2")
               shinyjs::hideElement("fileMakePrediciton2")
               shinyjs::hideElement("makePredictionButton2")
+              shinyjs::hideElement("textForPrediction2")
             },
             "Bagging - Regressionsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Bagging-Verfahren berücksichtigt:" })
@@ -692,6 +699,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction2")
               shinyjs::hideElement("fileMakePrediciton2")
               shinyjs::hideElement("makePredictionButton2")
+              shinyjs::hideElement("textForPrediction2")
             },
             "Bagging - Klassifikationsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Bagging-Verfahren berücksichtigt:" })
@@ -708,6 +716,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction2")
               shinyjs::hideElement("fileMakePrediciton2")
               shinyjs::hideElement("makePredictionButton2")
+              shinyjs::hideElement("textForPrediction2")
             },
             "Random Forests - Regressionsproblem" = {
               output$helpTextForPruningAndRandomForests1 <- renderText({ "Nachfolgende Parameter werden für das Random-Forests-Verfahren berücksichtigt:" })
@@ -724,6 +733,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction2")
               shinyjs::hideElement("fileMakePrediciton2")
               shinyjs::hideElement("makePredictionButton2")
+              shinyjs::hideElement("textForPrediction2")
             },
             "Random Forests - Klassifikationsproblem" = {
               shinyjs::showElement("unique2")
@@ -740,6 +750,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction2")
               shinyjs::hideElement("fileMakePrediciton2")
               shinyjs::hideElement("makePredictionButton2")
+              shinyjs::hideElement("textForPrediction2")
             },
             {
               shinyjs::hideElement("helpTextForPruningAndRandomForests2")
@@ -751,6 +762,7 @@ server <- function(input, output, session) {
               shinyjs::hideElement("makePrediction2")
               shinyjs::hideElement("fileMakePrediciton2")
               shinyjs::hideElement("makePredictionButton2")
+              shinyjs::hideElement("textForPrediction2")
             }
     )
   })
