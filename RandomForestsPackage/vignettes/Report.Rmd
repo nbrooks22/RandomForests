@@ -186,8 +186,8 @@ pruning(data$tree,lambda,type="reg")
 Die Funktion `cross_validation` nimmt Trainingsdaten `data`, eine Parametermenge `Lambda`, eine natürliche Zahl `m` und den Typ `type` entgegen. Bei Typ handelt es sich wieder um die Unterscheidung zwischen Regression (`type`=reg) und Klassifikation (`type`=class). Die natürliche Zahl `m` gibt an mit wievielen Teilmengen eine Partition der Trainingsdaten `data` erstellt werden soll. Der Rückgabewert der Funktion ist die Kompenente des Parametervektors `Lambda`, welche mittels Cross-Validation als bester Schätzer `lambda` für das Pruning-Verfahren geeignet ist. ACHTUNG: Schon für kleines `m` (m \<= 4) und wenige Komponenten in `Lambda` (4 oder weniger Einträge) können hier sehr lange Laufzeiten entstehen.
 
 ```{r}
-Lambda <- c(1,2,3)/100
-cross_validation(data_reg2, Lambda, m=3, type="reg")
+Lambda <- c(1,2)/100
+cross_validation(data_reg2, Lambda, m=2, type="reg")
 ```
 
 ### Erstelle Bäume durch Bootstrap Aggregation mit `bagging()`
