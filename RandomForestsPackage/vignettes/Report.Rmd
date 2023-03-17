@@ -76,9 +76,9 @@ Für die Entscheidungsregel/die Schätzung eines Wertes gibt es die folgende Fun
 
 Funktionen um einen Entscheidungsbaum zu visualisieren:
 
--   `printRegression()`
--   `printClassification()`
--   `plotTree()`
+-   `printRegression()` zeichne Regressionsdaten und die zu dem Baum zugehörige Entscheidungsregel
+-   `printClassification()` zeichne Klassifikationsdaten und die zu dem Baum zugehörige Entscheidungsregel
+-   `plotTree()` zeichne einen Entscheidungsbaum
 
 ### Erstelle einen Baum mit `greedy_cart()`
 
@@ -120,7 +120,7 @@ greedy_cart(x = x, y = y, data = data_reg, type = "reg", depth = 2)
 
 Die minimale Anzahl an Trainingsdaten die in einem Knoten sein soll, damit der Knoten weiter aufgeteilt wird, beträgt `num_split`. Bei 10 Trainingsdaten in einem Knoten wird noch weiter aufgeteilt, bei 9 und weniger nicht mehr.
 
-```{r, eval = FALSE}
+```{r}
 data_1 <- greedy_cart(x = x, y = y, data = data_reg, type = "reg", num_split = 10)
 ```
 
@@ -136,7 +136,7 @@ greedy_cart(x = x, y = y, data = data_reg, type = "reg", min_num = 5)
 
 Den Entscheidungsbaum kann man mit der Funktion `plotTree()` zeichnen lassen. Hierbei kann das erste Argument eine Umgebung wie man sie bei `greedy_cart()` bekommt sein, oder eine benannte Liste mit einem Baum in Form eines Tibbles und dem Namen tree.
 
-```{r}
+```{r, fig.height= 5, fig.width=7}
 plotTree(data_1)
 ```
 
@@ -144,9 +144,8 @@ plotTree(data_1)
 
 Man kann sich die entstandene Schätzung eines Regressionsbaumes mit der Funktion `printRegression()` anzeigen lassen. Das erste Argument ist eine Umgebung wie man sie bei `greedy_cart()` bekommt. Das zweite Argument ist der Name des Plots.
 
-```{r}
-printRegression(data_1, "regression")
-#make_prediction(list(data_1$tree), matrix(0) ,type = "reg")
+```{r, warning = FALSE, fig.height= 5, fig.width=7}
+printRegression(data_1, "Regression")
 ```
 
 Analog funktioniert das gierige Verfahren für Klassifikationsprobleme.
@@ -170,8 +169,8 @@ tree <- greedy_cart(x = c(x1,x2), y = y, data = data_class, type = "class", uniq
 
 Die Entscheidungsregel eines Klassifikationsbaumes kann man sich ebenfalls anzeigen lassen mit `printClassification()`. Die beiden Argumente sind wie bei `printRegression()`
 
-```{r}
-printClassification(tree, "classification")
+```{r, fig.height= 5, fig.width=7}
+printClassification(tree, "Klassifikation")
 ```
 
 ### Wähle mittels `pruning()` einen bezüglich des Parameters `lambda` optimierten Teilbaum zu einem bestehendem CART
@@ -196,7 +195,7 @@ cross_validation(data_reg2, Lambda, m=2, type="reg")
 
 `bagging()` ist eine Erweiterung von `greedy_cart()`, die mithilfe von Bootstrap Aggregation mehrere Trainingsbäume erstellt, um bessere Vorhersagen treffen zu können. Wir wollen bei jedem Aufruf der Funktion `b` = 3 verschiedene Bäume erstellen.
 
-```{r, results='hide'}
+```{r, warning = FALSE}
 data <- bagging(data = data_reg2, b = 3, type = "reg")
 ```
 
@@ -219,7 +218,7 @@ data$Prediction
 
 Analog funktioniert das bagging Verfahren für Klassifikationsprobleme.
 
-```{r}
+```{r, eval = FALSE}
 bagging(data = data_class2, b = 8, type = "class")
 ```
 

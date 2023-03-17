@@ -66,7 +66,7 @@ printRegression <- function(data, plotname) {
   }
 
   # Legende
-  legend("topright", legend=c("Trainingsdaten", "Schätzer", "Trennlinien"), pch=c(1, NA, NA), lty=c(NA, 1, 2), cex=1.5)
+  legend("topright", legend=c("Trainingsdaten", "Schätzer", "Trennlinien"), pch=c(1, NA, NA), lty=c(NA, 1, 2))
 }
 
 
@@ -221,7 +221,7 @@ printClassification <- function(data, plotname) {
   plotLinesColor(data1, colorpal = c(rgb(1.0, 0, 0, alpha=0.4), rgb(0, 0, 1.0, alpha=0.4)))
 
   # Legende
-  legend("topright", legend=c("Trennlinien", "Schätzung Klasse 1", "Schätzung Klasse 2"), col=c("black", color[1], color[2]), pch=c(NA, 1, 1), lty=c(1, NA, NA), cex=1.5)
+  legend("topright", legend=c("Trennlinien", "Schätzung Klasse 1", "Schätzung Klasse 2"), col=c("black", color[1], color[2]), pch=c(NA, 1, 1), lty=c(1, NA, NA))
 }
 
 
