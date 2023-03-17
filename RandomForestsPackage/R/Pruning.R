@@ -356,6 +356,27 @@ pruning <- function(trees, lambda, type=NULL)
 }
 
 
+#' Partition
+#' @description Takes a data set and creates the complements a partition of \code{m} subsets
+#'
+#'@param data  A list of training data.
+#'@param m Integer
+#'
+#'@return A list with the original data set and the complements of the subsets given by a partition with \code{m} subsets.
+#'
+#'@details The integer \code{m} lets you choose how many subsets the partition of the training data \code{data} should have.
+#' Each complement of the subset will be returned as element of a list, with the first element being the original data set \code{data}.
+#' Hence the list will have \code{m+1} entries. An error will be returned if \code{m} is greater than the number of
+#' elements of \code{data}.
+#'
+#'@examples
+#' X <- runif(50,0,1)
+#' e <- rnorm(50,0,0.2)
+#' Y <- sin(2*pi*X) + e
+#' data <- list(x = matrix(X, nrow = 1), y = Y)
+#' partition(data,m=3)
+#'
+#'@export
 partition <- function(data,m=2)
 {
   if(length(data$y)< m) stop("Partition cannot have more subsets then set has elements")
