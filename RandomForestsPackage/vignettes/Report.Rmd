@@ -96,7 +96,6 @@ data$values
 data$dim
 ```
 
-
 #### Abbruchbedingungen
 
 Wenn man keine Abbruchbedingung angibt, erhält man einen Baum, der in jedem Blatt nur noch einen Datenpunkt besitzt.
@@ -133,21 +132,22 @@ Man teilt einen Knoten nur dann weiter auf, wenn beide darauffolgenden Blätter 
 greedy_cart(x = x, y = y, data = data_reg, type = "reg", min_num = 5)
 ```
 
-
 #### Anzeigen eines Baumes mit `plotTree()`
+
 Den Entscheidungsbaum kann man mit der Funktion `plotTree()` zeichnen lassen. Hierbei kann das erste Argument eine Umgebung wie man sie bei `greedy_cart()` bekommt sein, oder eine benannte Liste mit einem Baum in Form eines Tibbles und dem Namen tree.
+
 ```{r}
 plotTree(data_1)
 ```
 
 #### Plotten des Entscheidungsbaumes mit `printRegression()`
+
 Man kann sich die entstandene Schätzung eines Regressionsbaumes mit der Funktion `printRegression()` anzeigen lassen. Das erste Argument ist eine Umgebung wie man sie bei `greedy_cart()` bekommt. Das zweite Argument ist der Name des Plots.
+
 ```{r}
 printRegression(data_1, "regression")
 #make_prediction(list(data_1$tree), matrix(0) ,type = "reg")
 ```
-
-
 
 Analog funktioniert das gierige Verfahren für Klassifikationsprobleme.
 
@@ -166,8 +166,10 @@ Wenn sich nur noch Daten einer Klasse in einem Knoten befinden, wird dieser Knot
 tree <- greedy_cart(x = c(x1,x2), y = y, data = data_class, type = "class", unique = TRUE)
 ```
 
-#### Plotten des Entscheidungsbaumes mit `printClassification()` 
+#### Plotten des Entscheidungsbaumes mit `printClassification()`
+
 Die Entscheidungsregel eines Klassifikationsbaumes kann man sich ebenfalls anzeigen lassen mit `printClassification()`. Die beiden Argumente sind wie bei `printRegression()`
+
 ```{r}
 printClassification(tree, "classification")
 ```
@@ -205,8 +207,8 @@ data$Bagged_Trees
 data$Prediction
 ```
 
-
 #### `pred_val`
+
 Wenn man nun gleichzeitig Werte anhand der Beobachtungen schätzen will, kann man eine Matrix als Argument übergeben, wobei jede Spalte einen Vektor von gleicher Dimension wie die x-Werte der Eingangsdaten darstellt (in diesem Fall wollen wir eine Schätzung für 3 verschiedene eindimensionale Werte).
 
 ```{r}
@@ -217,7 +219,7 @@ data$Prediction
 
 Analog funktioniert das bagging Verfahren für Klassifikationsprobleme.
 
-```{r, eval = FALSE}
+```{r}
 bagging(data = data_class2, b = 8, type = "class")
 ```
 
@@ -229,7 +231,6 @@ bagging(data = data_class2, b = 8, type = "class")
 random_forest(x = c(x1,x2), y = y, data = data_class, type = "class", B = 5, A = 25, m = 1, num_leaf = 15)
 ```
 
-
 ### `make_prediction()`
 
 `make_prediction()` ist eine Funktion die uns erlaubt, unsere erstellten Bäume auch zu benutzen. Wir wollen nun eine Schätzung von Werten anhand der Entscheidungsbäume finden. Es wird als erstes Argument eine Liste von Bäumen in Tibbleform übergeben. ACHTUNG: Muss im list() Format übergeben werden, auch wenn es nur ein Baum ist. Das zweite Argument ist eine Matrix mit den Werten die man schätzen will, wobei jede Spalte einen Vektor von gleicher Dimension wie die x-Werte der Eingangsdaten darstellt (in diesem Fall testen wir 4 verschiedene eindimensionale Werte). Das Argument `type` ist wieder entweder `type` = "reg" oder `type` = "class", was auch immer für einen Typ die entsprechenden Bäume haben.
@@ -239,8 +240,3 @@ treelist <- bagging(data = data_reg2, b = 3, type = "reg")
 xlist <- matrix(c(0, 0.25, 0.5, 1), nrow = 1)
 make_prediction(treelist$Bagged_Trees, xlist, type = "reg")
 ```
-
-
-
-
-
