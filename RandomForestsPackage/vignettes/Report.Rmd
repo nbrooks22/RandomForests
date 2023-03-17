@@ -120,7 +120,7 @@ greedy_cart(x = x, y = y, data = data_reg, type = "reg", depth = 2)
 
 Die minimale Anzahl an Trainingsdaten die in einem Knoten sein soll, damit der Knoten weiter aufgeteilt wird, beträgt `num_split`. Bei 10 Trainingsdaten in einem Knoten wird noch weiter aufgeteilt, bei 9 und weniger nicht mehr.
 
-```{r, eval = FALSE}
+```{r}
 data_1 <- greedy_cart(x = x, y = y, data = data_reg, type = "reg", num_split = 10)
 ```
 
@@ -144,7 +144,7 @@ plotTree(data_1)
 
 Man kann sich die entstandene Schätzung eines Regressionsbaumes mit der Funktion `printRegression()` anzeigen lassen. Das erste Argument ist eine Umgebung wie man sie bei `greedy_cart()` bekommt. Das zweite Argument ist der Name des Plots.
 
-```{r}
+```{r, fig.width = 7, fig.height = 5}
 printRegression(data_1, "regression")
 #make_prediction(list(data_1$tree), matrix(0) ,type = "reg")
 ```

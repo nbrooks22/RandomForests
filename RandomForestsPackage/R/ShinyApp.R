@@ -4,8 +4,8 @@
 #' @import bslib
 #' @import DiagrammeR
 #' @import data.tree
+#' @import grDevices
 #' @export
-
 App <- function() {
   # Ui
   ui <- fluidPage(
