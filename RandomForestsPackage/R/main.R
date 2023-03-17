@@ -96,6 +96,9 @@ make_prediction <- function(tree_list, x_list, type = NULL){
   if(is.null(type)){
     stop("Please set the type to either `reg` or `class`!")
   }
+  if(length(tree_list[[1]]$A[[1]][[1]]) != nrow(x_list)){
+    stop("The dimensions of the prediction are not equal to the dimensions of the given data x-values!")
+  }
 
   y_s <- c()
 
@@ -158,7 +161,7 @@ make_prediction <- function(tree_list, x_list, type = NULL){
     if(type == "reg"){
       y_s <- append(y_s, mean(y_list))
     } else if(type == "class"){
-      y_s <- append(y_s, tail(names(sort(table(y_list))), 1))
+      y_s <- append(y_s, as.integer(tail(names(sort(table(y_list))), 1)))
     }
   }
   return(y_s);
