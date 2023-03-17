@@ -52,7 +52,7 @@ random_forest(
 \cr the default value is FALSE}
 }
 \value{
-a list of \code{B} trees (description for a tree see ?greedy_cart)
+a list of \code{B} trees in tibble form (description for a tree see ?greedy_cart)
 }
 \description{
 Random Forest Algorithm for either regression or classification data

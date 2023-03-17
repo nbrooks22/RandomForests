@@ -1,6 +1,26 @@
-####################################################################################
-#                         Plot Gieriges-Verfahren Regression
-####################################################################################
+#' Plot (Regression)
+#'
+#' Plot the values and the decision rule established by a tree for regression data (in the one-dimensional case)
+#'
+#' @param data an environment returned by the greedy_cart function (see ?greedy_cart)
+#' \cr or a named list with an element named tree, which is the tree in tibble form and an element with the name values containing the original
+#' x and y values in the form a tibble with column names "x" and "y"
+#' @param plotname name which we want to give the plot
+#'
+#'
+#' @return a plot with the original values and the decision rule established by the tree
+#' @export
+#'
+#' @examples
+#' X <- runif(100,0,1)
+#' e <- rnorm(100,0,0.2)
+#' Y <- sin(2*pi*X) + e
+#' data <- tibble(x = X, y = Y)
+#' val <- greedy_cart(x = x, y = y, data = data, type = "reg", num_split = 10)
+#' printRegression(val, "regression")
+#' printRegression(list(tree = val$tree, values = data), "regression")
+#'
+#'
 
 printRegression <- function(data, plotname) {
   # Plot Daten
@@ -50,9 +70,6 @@ printRegression <- function(data, plotname) {
 }
 
 
-####################################################################################
-#                     Plot Gieriges-Verfahren Klassifikation
-####################################################################################
 
 plotLinesColor <- function(data, currentNodePosition = 1, leftBelowPoint = NULL, rightAbovePoint = NULL, colorpal) {
   currentNode <- data$tree %>% filter(node == currentNodePosition)
@@ -151,6 +168,40 @@ plotLinesColor <- function(data, currentNodePosition = 1, leftBelowPoint = NULL,
 
 }
 
+#' Plot (Classification)
+#'
+#' Plot the values and the decision rule established by a tree for classification data (in the two-dimensional case)
+#'
+#' @param data an environment returned by the greedy_cart function (see ?greedy_cart)
+#' \cr or a named list with an element named tree, which is the tree in tibble form and an element named values with the original
+#' x and y values in the form a tibble with column names "x" and "y" for the x values and "classes" for the y values
+#' @param plotname name which we want to give the plot
+#'
+#'
+#' @return a plot with the original values and the decision rule established by the tree
+#' @export
+#'
+#' @examples
+#' X1 <- runif(200,0,1)
+#' X2 <- runif(200,0,1)
+#' e <- rnorm(200,0,0.05)
+#' k <- function(x,y) (x-0.5)*(y-0.5)
+#' g <- function(x,y,e){
+#'   Y <- c()
+#'   for(i in seq_along(x)){
+#'    if(k(X1[i],X2[i]) - e[i] <= 0){
+#'      Y[i] <- 1
+#'     } else{
+#'       Y[i] <- 2
+#'     }
+#'   }
+#'   Y
+#' }
+#' tbl <- tibble(x = X1, y = X2, classes = g(X1,X2,e))
+#' val <- greedy_cart(x = c(x,y), y = classes, data = tbl, type = "class", unique = TRUE, num_split = 20)
+#' printClassification(val, "classification")
+#' printClassification(list(tree = val$tree, values = tbl), "classification")
+
 printClassification <- function(data, plotname) {
   color <- c("red", "blue")
   data1 <- list()
@@ -173,9 +224,6 @@ printClassification <- function(data, plotname) {
   legend("topright", legend=c("Trennlinien", "Schätzung Klasse 1", "Schätzung Klasse 2"), col=c("black", color[1], color[2]), pch=c(NA, 1, 1), lty=c(1, NA, NA), cex=1.5)
 }
 
-####################################################################################
-#                                  Plot Tree
-####################################################################################
 
 moveSplit <- function(data) {
   data1 <- list()
@@ -196,6 +244,28 @@ moveSplit <- function(data) {
 
   return(data1)
 }
+
+
+#' Print Tree
+#'
+#' Print a decision tree
+#'
+#' @param data an environment returned by the greedy_cart function (see ?greedy_cart) or a named list with a tree in form of a tibble and the name tree
+#'
+#'
+#' @return picture of a decision tree
+#' @export
+#'
+#' @examples
+#' X <- runif(100,0,1)
+#' e <- rnorm(100,0,0.2)
+#' Y <- sin(2*pi*X) + e
+#' data <- list(x = matrix(X, nrow = 1), y = Y)
+#' val <- greedy_cart(x = x, y = y, data = data, type = "reg", num_leaf = 10)
+#' plotTree(val)
+#' plotTree(list(tree = val$tree))
+#'
+#'
 
 plotTree <- function(data) {
   data1 <- moveSplit(data)

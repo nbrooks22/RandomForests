@@ -19,7 +19,7 @@
 #' @param num_split split only nodes which contain at least `num_split` elements \cr must be greater than or equal to 2
 #' @param min_num only split a node, if both child nodes have at least `min_num` elements \cr must be greater than or equal to 1
 #'
-#' @return a list of `B` trees (description for a tree see ?greedy_cart)
+#' @return a list of `B` trees in tibble form (description for a tree see ?greedy_cart)
 #' @export
 #'
 #' @examples
@@ -113,7 +113,7 @@ random_forest_regression <- function(data, B, A = NULL, m = 0, num_leaf = NULL, 
 #' @param unique if `unique` is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
 #' \cr the default value is FALSE
 #'
-#' @return a list of `B` trees (description for a tree see ?greedy_cart)
+#' @return a list of `B` trees in tibble form (description for a tree see ?greedy_cart)
 #' @export
 #'
 #' @examples
@@ -217,7 +217,7 @@ random_forest_classification <- function(data, B, A = NULL, m = 0, num_leaf = NU
 #' @param unique parameter for classification data: if `unique` is set to TRUE we don't split nodes where all data points in this node have the same class (y value)
 #' \cr the default value is FALSE
 #'
-#' @return a list of `B` trees (description for a tree see ?greedy_cart)
+#' @return a list of `B` trees in tibble form (description for a tree see ?greedy_cart)
 #'
 #' @export
 #'

@@ -40,7 +40,7 @@ values have the name y and are in the form of a vector}
 \item{min_num}{only split a node, if both child nodes have at least \code{min_num} elements \cr must be greater than or equal to 1}
 }
 \value{
-a list of \code{B} trees (description for a tree see ?greedy_cart)
+a list of \code{B} trees in tibble form (description for a tree see ?greedy_cart)
 }
 \description{
 Random Forest Algorithm for regression data
