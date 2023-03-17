@@ -241,10 +241,9 @@ printClassification <- function(data, plotname) {
     pchVector <- c(pchVector, NA)
   }
 
-
+  # Legende
   legend("topright", legend=legende, col=colorVector, pch=pchVector, lty=ltyVector)
 }
-
 
 moveSplit <- function(data) {
   data1 <- list()
