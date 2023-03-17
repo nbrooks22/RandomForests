@@ -76,7 +76,7 @@ App <- function() {
                         textOutput("helpTextForPruningAndRandomForests1"),
                         numericInput("lambdaVar1",
                                      "Lambda",
-                                     value = 0,
+                                     value = 0.002,
                                      min = 0)
                       ),
 
@@ -196,7 +196,7 @@ App <- function() {
                         textOutput("helpTextForPruningAndRandomForests2"),
                         numericInput("lambdaVar2",
                                      "Lambda",
-                                     value = 0,
+                                     value = 0.002,
                                      min = 0)
                       ),
 
@@ -246,7 +246,7 @@ App <- function() {
                       fluidRow(
                         column(12, align="center",
                                hidden(
-                                 actionButton("makePredictionButton1", "Berechne Schätzung", icon("rotate"),
+                                 actionButton("makePredictionButton2", "Berechne Schätzung", icon("rotate"),
                                               style="color: #fff; background-color: #337ab7; border-color: #2e6da4"),
                                  textOutput("textForPrediction2")
                                )
@@ -284,6 +284,7 @@ App <- function() {
     # Button-Style
     shinyjs::runjs("$('#file').parent().removeClass('btn-default').addClass('btn-info');")
     shinyjs::runjs("$('#fileMakePrediciton1').parent().removeClass('btn-default').addClass('btn-info');")
+    shinyjs::runjs("$('#fileMakePrediciton2').parent().removeClass('btn-default').addClass('btn-info');")
 
     # Beispiele
     observeEvent(input$update1, {
